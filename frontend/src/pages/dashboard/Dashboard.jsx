@@ -14,6 +14,9 @@ export default function Dashboard() {
         <Link to="/onboarding" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px 28px', color: '#f5f0eb', textDecoration: 'none', fontSize: 15 }}>
           ⚙️ Update Profile
         </Link>
+        <Link to="/exercise" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px 28px', color: '#f5f0eb', textDecoration: 'none', fontSize: 15 }}>
+          🏃‍♀️ Exercise Plan
+        </Link>
       </div>
       <button onClick={logout} style={{ marginTop: 40, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 20px', color: 'rgba(245,240,235,0.4)', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
         Logout
