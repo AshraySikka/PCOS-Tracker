@@ -40,6 +40,24 @@ export default function Dashboard() {
     .finally(() => setLoading(false))
   }, [])
 
+  const [showInstall, setShowInstall] = useState(false)
+
+  useEffect(() => {
+    window.addEventListener('appinstalled', () => setShowInstall(false))
+    if (window.deferredInstallPrompt) setShowInstall(true)
+    window.addEventListener('beforeinstallprompt', () => setShowInstall(true))
+  }, [])
+
+  const installApp = () => {
+    if (window.deferredInstallPrompt) {
+      window.deferredInstallPrompt.prompt()
+      window.deferredInstallPrompt.userChoice.then(() => {
+        window.deferredInstallPrompt = null
+        setShowInstall(false)
+      })
+    }
+  }
+
   const chartData = report?.days?.map(d => ({
     day: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
     calories: d.calories,
@@ -59,6 +77,13 @@ export default function Dashboard() {
         </div>
         <button className="btn-logout" onClick={logout}>Sign out</button>
       </div>
+
+      {showInstall && (
+        <div className="install-banner">
+          <span>📱 Add PCOS Tracker to your home screen</span>
+          <button onClick={installApp}>Install</button>
+        </div>
+      )}
 
       {profile && (
         <div className="metrics-row">
