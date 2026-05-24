@@ -10,6 +10,7 @@ import './index.css'
 import Onboarding from './pages/onboarding/Onboarding'
 import Meals from './pages/meals/Meals'
 import Exercise from './pages/exercise/Exercise'
+import Log from './pages/log/Log'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -35,6 +36,9 @@ function AppRoutes() {
       } />
       <Route path="/exercise" element={
         <ProtectedRoute><Exercise /></ProtectedRoute>
+      } />
+      <Route path="/log" element={
+        <ProtectedRoute><Log /></ProtectedRoute>
       } />
     </Routes>
   )
