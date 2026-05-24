@@ -8,6 +8,7 @@ import ForgotPassword from './pages/auth/ForgotPassword'
 import Dashboard from './pages/dashboard/Dashboard'
 import './index.css'
 import Onboarding from './pages/onboarding/Onboarding'
+import Meals from './pages/meals/Meals'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -28,6 +29,9 @@ function AppRoutes() {
         <ProtectedRoute><Onboarding /></ProtectedRoute>
       } />
       <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="/meals" element={
+        <ProtectedRoute><Meals /></ProtectedRoute>
+      } />
     </Routes>
   )
 }
