@@ -39,7 +39,7 @@ class Meal(models.Model):
     protein_g = models.IntegerField(default=0)
     calories = models.IntegerField(default=0)
     ingredients = models.JSONField(default=list)
-    image_url = models.URLField(blank=True, default='')
+    image_url = models.URLField(max_length=1000, blank=True, default='')
     image_query = models.CharField(max_length=200, blank=True)
 
     class Meta:
