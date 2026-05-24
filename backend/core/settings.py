@@ -96,12 +96,12 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://pcos-tracker-b4wlaxo1e-ashraysikkas-projects.vercel.app',
+    'https://pcos-tracker-ten.vercel.app',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://pcos-tracker-b4wlaxo1e-ashraysikkas-projects.vercel.app',
+    'https://pcos-tracker-ten.vercel.app',
 ]
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
