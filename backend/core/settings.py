@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'profiles',
+    'meals',
 ]
 
 MIDDLEWARE = [
