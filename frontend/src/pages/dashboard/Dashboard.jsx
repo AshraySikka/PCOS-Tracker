@@ -189,6 +189,10 @@ export default function Dashboard() {
           <span className="nav-icon">⚙️</span>
           <span className="nav-label">Profile</span>
         </Link>
+        <Link to="/settings" className="nav-card">
+          <span className="nav-icon">🔔</span>
+          <span className="nav-label">Settings</span>
+        </Link>
       </div>
     </div>
   )
