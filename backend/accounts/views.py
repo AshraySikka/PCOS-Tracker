@@ -48,3 +48,10 @@ def logout_view(request):
 @permission_classes([IsAuthenticated])
 def me(request):
     return Response(UserSerializer(request.user).data)
+
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
+
+def csrf_token(request):
+    token = get_token(request)
+    return JsonResponse({'csrfToken': token})

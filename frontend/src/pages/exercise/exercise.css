@@ -1,0 +1,292 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+.exercise-page {
+  min-height: 100vh;
+  background: #0d0d0d;
+  font-family: 'DM Sans', sans-serif;
+  color: #f5f0eb;
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.exercise-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  margin: 0 0 8px;
+}
+
+.exercise-header p {
+  font-size: 14px;
+  color: rgba(245, 240, 235, 0.4);
+  margin: 0;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+.btn-generate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8b4a0;
+  color: #1a0f0a;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.btn-generate:hover { opacity: 0.9; }
+.btn-generate:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(26, 15, 10, 0.3);
+  border-top-color: #1a0f0a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.exercise-error {
+  background: rgba(232, 112, 112, 0.1);
+  border: 1px solid rgba(232, 112, 112, 0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #e87070;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.exercise-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0d0d0d;
+  color: rgba(245, 240, 235, 0.4);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.generating-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 40px;
+  text-align: center;
+  gap: 16px;
+}
+
+.generating-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(232, 180, 160, 0.2);
+  border-top-color: #e8b4a0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.generating-state p { font-size: 16px; color: #f5f0eb; margin: 0; }
+.generating-state span { font-size: 13px; color: rgba(245, 240, 235, 0.3); }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 40px;
+  text-align: center;
+  gap: 16px;
+}
+
+.empty-icon { font-size: 48px; }
+.empty-state h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin: 0; }
+.empty-state p { font-size: 15px; color: rgba(245, 240, 235, 0.4); max-width: 400px; margin: 0; }
+
+.btn-generate-large {
+  background: #e8b4a0;
+  color: #1a0f0a;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+
+.btn-generate-large:hover { opacity: 0.9; }
+
+.day-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.day-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: rgba(245, 240, 235, 0.5);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 64px;
+}
+
+.day-tab .day-icon { font-size: 16px; }
+.day-tab:hover { border-color: rgba(232, 180, 160, 0.3); color: #f5f0eb; }
+.day-tab.active { background: rgba(232, 180, 160, 0.15); border-color: #e8b4a0; color: #e8b4a0; }
+.day-tab.rest { opacity: 0.6; }
+
+.day-content { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.day-header {
+  border-left: 3px solid #e8b4a0;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 16px 16px 0;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.day-title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.day-type-icon { font-size: 28px; }
+
+.day-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+.day-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(245, 240, 235, 0.4);
+}
+
+.intensity-badge {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.rest-day {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+}
+
+.rest-day p {
+  font-size: 15px;
+  color: rgba(245, 240, 235, 0.5);
+  margin: 0 0 12px;
+  line-height: 1.6;
+}
+
+.exercises-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exercise-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px 24px;
+  transition: border-color 0.2s;
+}
+
+.exercise-card:hover { border-color: rgba(232, 180, 160, 0.2); }
+
+.exercise-info { flex: 1; }
+
+.exercise-info h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  color: #f5f0eb;
+}
+
+.exercise-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(245, 240, 235, 0.4);
+  margin-bottom: 6px;
+}
+
+.exercise-notes {
+  font-size: 13px;
+  color: rgba(245, 240, 235, 0.35);
+  margin: 6px 0 0;
+  font-style: italic;
+}
+
+.youtube-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 8px 16px;
+  color: #ff6b6b;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-left: 16px;
+}
+
+.youtube-btn:hover {
+  background: rgba(255, 0, 0, 0.15);
+  border-color: rgba(255, 0, 0, 0.35);
+}
+
+@media (max-width: 768px) {
+  .exercise-page { padding: 24px 16px; }
+  .exercise-header { flex-direction: column; gap: 16px; }
+  .exercise-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .youtube-btn { margin-left: 0; }
+}

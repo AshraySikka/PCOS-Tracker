@@ -21,6 +21,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'profiles',
+    'meals',
+    'exercise',
+    'logs',
+    'reports',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -107,3 +112,17 @@ SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 
 
 AUTH_USER_MODEL = 'accounts.User'
+
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = 'Lax'
