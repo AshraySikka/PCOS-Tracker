@@ -31,7 +31,6 @@ function AppRoutes() {
       <Route path="/onboarding" element={
         <ProtectedRoute><Onboarding /></ProtectedRoute>
       } />
-      <Route path="*" element={<Navigate to="/login" />} />
       <Route path="/meals" element={
         <ProtectedRoute><Meals /></ProtectedRoute>
       } />
@@ -44,6 +43,7 @@ function AppRoutes() {
       <Route path="/settings" element={
         <ProtectedRoute><Settings /></ProtectedRoute>
       } />
+      <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
   )
 }
@@ -53,6 +53,14 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
   })
 }
+
+let deferredPrompt
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault()
+  deferredPrompt = e
+  window.deferredInstallPrompt = e
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
