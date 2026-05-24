@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 
@@ -19,7 +19,7 @@ def auth_client(client):
     return client
 
 @pytest.mark.django_db
-@patch('profiles.views.upload_avatar')
+@patch('profiles.storage.upload_avatar')
 def test_avatar_upload_success(mock_upload, auth_client):
     mock_upload.return_value = 'https://supabase.co/storage/avatars/test.jpg'
     image = SimpleUploadedFile('test.jpg', b'fakeimagecontent', content_type='image/jpeg')
@@ -33,7 +33,7 @@ def test_avatar_upload_no_file(auth_client):
     assert response.status_code == 400
 
 @pytest.mark.django_db
-@patch('profiles.views.upload_avatar')
+@patch('profiles.storage.upload_avatar')
 def test_avatar_upload_too_large(mock_upload, auth_client):
     large_file = SimpleUploadedFile('big.jpg', b'x' * (6 * 1024 * 1024), content_type='image/jpeg')
     response = auth_client.post('/api/profile/avatar/', {'avatar': large_file})

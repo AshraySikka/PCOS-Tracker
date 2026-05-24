@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import UserProfile
 from .serializers import UserProfileSerializer
+from .storage import upload_avatar
 
 @api_view(['GET', 'POST', 'PATCH'])
 @permission_classes([IsAuthenticated])
@@ -36,7 +37,7 @@ def metrics(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def upload_avatar(request):
+def avatar_upload(request):
     if 'avatar' not in request.FILES:
         return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -46,7 +47,6 @@ def upload_avatar(request):
         return Response({'error': 'File too large. Max 5MB'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        from .storage import upload_avatar
         url = upload_avatar(file, request.user.id)
         profile_obj, _ = UserProfile.objects.get_or_create(user=request.user)
         profile_obj.avatar_url = url
