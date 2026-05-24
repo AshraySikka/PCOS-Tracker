@@ -7,6 +7,7 @@ import Register from './pages/auth/Register'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import Dashboard from './pages/dashboard/Dashboard'
 import './index.css'
+import Onboarding from './pages/onboarding/Onboarding'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -22,6 +23,9 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/dashboard" element={
         <ProtectedRoute><Dashboard /></ProtectedRoute>
+      } />
+      <Route path="/onboarding" element={
+        <ProtectedRoute><Onboarding /></ProtectedRoute>
       } />
       <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
