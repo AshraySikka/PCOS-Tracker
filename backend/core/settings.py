@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'meals',
     'exercise',
     'logs',
+    'reports',
 ]
 
 MIDDLEWARE = [
