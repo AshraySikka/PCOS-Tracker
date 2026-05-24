@@ -34,3 +34,4 @@ frontend/.vite/
 .idea/
 *.swp
 *.swo
+node_modules/
