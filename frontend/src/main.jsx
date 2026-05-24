@@ -9,6 +9,7 @@ import Dashboard from './pages/dashboard/Dashboard'
 import './index.css'
 import Onboarding from './pages/onboarding/Onboarding'
 import Meals from './pages/meals/Meals'
+import Exercise from './pages/exercise/Exercise'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -31,6 +32,9 @@ function AppRoutes() {
       <Route path="*" element={<Navigate to="/login" />} />
       <Route path="/meals" element={
         <ProtectedRoute><Meals /></ProtectedRoute>
+      } />
+      <Route path="/exercise" element={
+        <ProtectedRoute><Exercise /></ProtectedRoute>
       } />
     </Routes>
   )
