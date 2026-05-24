@@ -1,7 +1,11 @@
+aiohappyeyeballs==2.6.2
+aiohttp==3.13.5
+aiosignal==1.4.0
 annotated-types==0.7.0
 anthropic==0.104.1
 anyio==4.13.0
 asgiref==3.11.1
+attrs==26.1.0
 cachetools==6.2.6
 certifi==2026.5.20
 cffi==2.0.0
@@ -15,10 +19,12 @@ Django==6.0.5
 django-cors-headers==4.9.0
 djangorestframework==3.17.1
 docstring_parser==0.18.0
+frozenlist==1.8.0
 fsspec==2026.4.0
 h11==0.16.0
 h2==4.3.0
 hpack==4.1.0
+http_ece==1.2.1
 httpcore==1.0.9
 httpx==0.28.1
 hyperframe==6.1.0
@@ -30,10 +36,12 @@ mdurl==0.1.2
 mmh3==5.2.1
 multidict==6.7.1
 packaging==26.2
+pillow==12.2.0
 pluggy==1.6.0
 postgrest==2.30.0
 propcache==0.5.2
 psycopg2-binary==2.9.12
+py-vapid==1.9.4
 pycparser==3.0
 pydantic==2.13.4
 pydantic_core==2.46.4
@@ -46,6 +54,7 @@ pytest==9.0.3
 pytest-django==4.12.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
+pywebpush==2.3.0
 realtime==2.30.0
 requests==2.34.2
 rich==14.3.4

@@ -11,6 +11,7 @@ import Onboarding from './pages/onboarding/Onboarding'
 import Meals from './pages/meals/Meals'
 import Exercise from './pages/exercise/Exercise'
 import Log from './pages/log/Log'
+import Settings from './pages/settings/Settings'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -40,8 +41,17 @@ function AppRoutes() {
       <Route path="/log" element={
         <ProtectedRoute><Log /></ProtectedRoute>
       } />
+      <Route path="/settings" element={
+        <ProtectedRoute><Settings /></ProtectedRoute>
+      } />
     </Routes>
   )
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+  })
 }
 
 createRoot(document.getElementById('root')).render(
