@@ -5,5 +5,6 @@ def test_true():
 
 @pytest.mark.django_db
 def test_database_accessible():
-    from django.contrib.auth.models import User
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
     assert User.objects.count() == 0
