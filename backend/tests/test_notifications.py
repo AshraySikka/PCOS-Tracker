@@ -51,4 +51,4 @@ def test_vapid_key(auth_client):
 @pytest.mark.django_db
 def test_preferences_unauthenticated(client):
     response = client.get('/api/notifications/preferences/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

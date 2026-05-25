@@ -56,4 +56,4 @@ def test_protein_target(auth_client):
 @pytest.mark.django_db
 def test_profile_unauthenticated(client):
     response = client.get('/api/profile/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

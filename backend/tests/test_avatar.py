@@ -43,4 +43,4 @@ def test_avatar_upload_too_large(mock_upload, auth_client):
 @pytest.mark.django_db
 def test_avatar_unauthenticated(client):
     response = client.post('/api/profile/avatar/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

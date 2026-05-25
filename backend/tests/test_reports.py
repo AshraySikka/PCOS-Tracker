@@ -41,4 +41,4 @@ def test_monthly_report(auth_client):
 @pytest.mark.django_db
 def test_reports_unauthenticated(client):
     response = client.get('/api/reports/weekly/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

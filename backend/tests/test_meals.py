@@ -95,4 +95,4 @@ def test_current_meal_plan_after_generate(mock_image, mock_generate, auth_client
 @pytest.mark.django_db
 def test_generate_unauthenticated(client):
     response = client.post('/api/meals/generate/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

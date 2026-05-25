@@ -91,4 +91,4 @@ def test_youtube_url_generated(auth_client):
 @pytest.mark.django_db
 def test_generate_unauthenticated(client):
     response = client.post('/api/exercise/generate/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

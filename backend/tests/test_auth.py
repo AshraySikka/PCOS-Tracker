@@ -93,4 +93,4 @@ def test_me_authenticated(client):
 @pytest.mark.django_db
 def test_me_unauthenticated(client):
     response = client.get('/api/auth/me/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]

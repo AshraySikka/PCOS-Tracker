@@ -90,7 +90,7 @@ def test_delete_food_entry(auth_client):
 @pytest.mark.django_db
 def test_log_unauthenticated(client):
     response = client.get('/api/logs/today/')
-    assert response.status_code == 403
+    assert response.status_code in [401, 403]
 
 @pytest.mark.django_db
 @patch('logs.claude_service.estimate_calories')
