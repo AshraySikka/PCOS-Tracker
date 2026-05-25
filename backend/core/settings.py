@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.middleware.csrf import CsrfViewMiddleware
+
 
 load_dotenv()
 
@@ -26,6 +28,7 @@ INSTALLED_APPS = [
     'logs',
     'reports',
     'notifications',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -102,6 +105,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://pcos-tracker-ten.vercel.app',
+    'https://pcos-tracker-wscj.onrender.com',
 ]
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
@@ -111,6 +115,7 @@ SESSION_COOKIE_SECURE = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -132,3 +137,4 @@ SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'
 CORS_ALLOW_ALL_ORIGINS = os.getenv('DJANGO_CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
+

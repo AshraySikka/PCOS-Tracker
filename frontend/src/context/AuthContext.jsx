@@ -8,19 +8,35 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+      setLoading(false)
+      return
+    }
     getMe()
       .then(res => setUser(res.data))
-      .catch(() => setUser(null))
+      .catch(() => {
+        localStorage.removeItem('authToken')
+        setUser(null)
+      })
       .finally(() => setLoading(false))
   }, [])
 
+  const setUserWithToken = (userData) => {
+    if (userData?.token) {
+      localStorage.setItem('authToken', userData.token)
+    }
+    setUser(userData)
+  }
+
   const logout = async () => {
     await logoutApi()
+    localStorage.removeItem('authToken')
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, loading }}>
+    <AuthContext.Provider value={{ user, setUser: setUserWithToken, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )

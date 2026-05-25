@@ -10,6 +10,16 @@ const api = axios.create({
   },
 })
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken')
+  if (token) {
+    config.headers['Authorization'] = `Token ${token}`
+  }
+  return config
+})
+
+export default api
+
 function getCookie(name) {
   const value = `; ${document.cookie}`
   const parts = value.split(`; ${name}=`)

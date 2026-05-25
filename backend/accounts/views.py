@@ -6,8 +6,12 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -15,10 +19,10 @@ def register(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        return Response(
-            UserSerializer(user).data,
-            status=status.HTTP_201_CREATED
-        )
+        token, _ = Token.objects.get_or_create(user=user)
+        data = UserSerializer(user).data
+        data['token'] = token.key
+        return Response(data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -33,11 +37,11 @@ def login_view(request):
         )
         if user:
             login(request, user)
-            return Response(UserSerializer(user).data)
-        return Response(
-            {'error': 'Invalid credentials'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+            token, _ = Token.objects.get_or_create(user=user)
+            data = UserSerializer(user).data
+            data['token'] = token.key
+            return Response(data)
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
