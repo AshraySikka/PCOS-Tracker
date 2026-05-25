@@ -1,8 +1,6 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from django.middleware.csrf import CsrfViewMiddleware
-
 
 load_dotenv()
 
@@ -20,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'accounts',
     'profiles',
@@ -28,7 +27,6 @@ INSTALLED_APPS = [
     'logs',
     'reports',
     'notifications',
-    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -65,9 +63,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
     import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
-    }
+    DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
 else:
     DATABASES = {
         'default': {
@@ -96,17 +92,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'https://pcos-tracker-ten.vercel.app',
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://pcos-tracker-ten.vercel.app',
     'https://pcos-tracker-wscj.onrender.com',
+    'https://pcos-tracker-b4wlaxo1e-ashraysikkas-projects.vercel.app',
+    'https://pcos-tracker-git-main-ashraysikkas-projects.vercel.app',
 ]
+
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
@@ -131,10 +127,3 @@ SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
 VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
 VAPID_CLAIMS_EMAIL = os.getenv('VAPID_CLAIMS_EMAIL')
-
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
-CORS_ALLOW_ALL_ORIGINS = os.getenv('DJANGO_CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
-
