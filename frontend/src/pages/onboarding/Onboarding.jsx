@@ -199,7 +199,7 @@ export default function Onboarding() {
           <div className="step">
             <div className="step-icon">📋</div>
             <h2>Your food list</h2>
-            <p>List foods you usually eat — your AI meal plan will be built around these</p>
+            <p>List foods you usually eat, your AI meal plan will be built around these</p>
             <div className="field">
               <textarea
                 placeholder="e.g. eggs, chicken, rice, spinach, yogurt, almonds, lentils, oats..."
@@ -244,7 +244,16 @@ export default function Onboarding() {
             </button>
           ) : (
             <button className="btn-primary" onClick={submit} disabled={loading}>
-              {loading ? 'Saving...' : 'Complete setup'}
+              {loading ? (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <span style={{
+                    width: 16, height: 16, border: '2px solid rgba(26,15,10,0.3)',
+                    borderTopColor: '#1a0f0a', borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite', display: 'inline-block'
+                  }} />
+                  Setting up your profile...
+                </span>
+              ) : 'Complete setup'}
             </button>
           )}
         </div>

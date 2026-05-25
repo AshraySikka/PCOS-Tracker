@@ -4,6 +4,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 
 User = get_user_model()
 
@@ -49,8 +51,7 @@ def logout_view(request):
 def me(request):
     return Response(UserSerializer(request.user).data)
 
-from django.middleware.csrf import get_token
-from django.http import JsonResponse
+
 
 def csrf_token(request):
     token = get_token(request)
