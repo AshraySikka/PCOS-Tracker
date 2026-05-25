@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react'
 import { generateMealPlan, getCurrentMealPlan } from '../../api/meals'
 import './meals.css'
 
-const DAYS = plan?.days?.map(d => d.day) || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
 const MEAL_ICONS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙' }
 
 export default function Meals() {
   const [plan, setPlan] = useState(null)
+  const DAYS = plan?.days?.map(d => d.day) || ['Monday', 'Tuesday', 'Wednesday']
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [activeDay, setActiveDay] = useState('Monday')
   const [error, setError] = useState('')
+  
 
   useEffect(() => {
     getCurrentMealPlan()
