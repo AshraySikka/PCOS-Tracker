@@ -54,7 +54,7 @@ Generate all 7 days (Monday through Sunday). Include rest days as type "rest" wi
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=6000,
+        max_tokens=3000,
         messages=[{"role": "user", "content": prompt}]
     )
 
