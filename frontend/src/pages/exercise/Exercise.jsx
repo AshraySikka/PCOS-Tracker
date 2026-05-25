@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import api from '../../api/client'
 import './exercise.css'
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
 const TYPE_COLORS = {
   strength: '#e8b4a0',
   cardio: '#a0c4e8',
@@ -26,6 +24,7 @@ const TYPE_ICONS = {
 
 export default function Exercise() {
   const [plan, setPlan] = useState(null)
+  const DAYS = plan?.days?.map(d => d.day) || ['Monday', 'Tuesday', 'Wednesday']
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [activeDay, setActiveDay] = useState('Monday')
