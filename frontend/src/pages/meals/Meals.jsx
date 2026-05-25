@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { generateMealPlan, getCurrentMealPlan } from '../../api/meals'
 import './meals.css'
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const DAYS = plan?.days?.map(d => d.day) || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const MEAL_ICONS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙' }
 
 export default function Meals() {

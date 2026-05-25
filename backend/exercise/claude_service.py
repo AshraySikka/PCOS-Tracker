@@ -50,7 +50,7 @@ Respond ONLY with a valid JSON object, no other text:
   ]
 }}
 
-Generate all 7 days (Monday through Sunday). Include rest days as type "rest" with no exercises."""
+Generate exactly 3 days only (Monday, Tuesday, Wednesday). Include rest days as type "rest" with no exercises."""
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
