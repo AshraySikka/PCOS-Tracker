@@ -45,9 +45,9 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <span className="auth-logo">PCOS Tracker</span>
+          <div className="auth-logo">✦</div>
           <h1>Welcome back</h1>
-          <p>Pick up where you left off.</p>
+          <p>Continue your wellness journey</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
@@ -78,14 +78,18 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="auth-divider">or</div>
+        <div className="auth-divider"><span>or</span></div>
         <button type="button" className="btn-demo" onClick={tryDemo} disabled={demoLoading}>
-          {demoLoading ? 'Opening demo...' : 'Try the demo as Jane'}
+          <span className="demo-avatar">J</span>
+          <span className="demo-text">
+            <strong>{demoLoading ? 'Opening demo...' : 'Try the demo as Jane'}</strong>
+            <small>No sign up needed. Five months of sample data.</small>
+          </span>
         </button>
 
         <div className="auth-footer">
           <Link to="/forgot-password">Forgot password?</Link>
-          <span>|</span>
+          <span>·</span>
           <Link to="/register">Create account</Link>
         </div>
       </div>

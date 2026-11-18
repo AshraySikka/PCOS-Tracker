@@ -4,14 +4,14 @@ export const THEME_STORAGE_KEY = 'pcos-theme'
 
 const ThemeContext = createContext(null)
 
+// Dark is the default look. Light is something you switch on.
 function readInitialTheme() {
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY)
     if (saved === 'light' || saved === 'dark') return saved
   } catch {
-    // storage can be blocked in private mode, fall through to the system setting
+    // storage can be blocked in private mode, just use the default
   }
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light'
   return 'dark'
 }
 
@@ -20,6 +20,8 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#0d0d0d' : '#fbf4ef')
     try {
       localStorage.setItem(THEME_STORAGE_KEY, theme)
     } catch {
@@ -30,7 +32,7 @@ export function ThemeProvider({ children }) {
   const toggleTheme = useCallback(() => {
     const root = document.documentElement
     root.classList.add('theme-transition')
-    window.setTimeout(() => root.classList.remove('theme-transition'), 350)
+    window.setTimeout(() => root.classList.remove('theme-transition'), 400)
     setTheme(t => (t === 'dark' ? 'light' : 'dark'))
   }, [])
 

@@ -23,7 +23,7 @@ function ProtectedRoute({ children }) {
   return user ? <AppShell>{children}</AppShell> : <Navigate to="/login" />
 }
 
-// Signed out pages have no nav bar, so the theme toggle floats in the corner
+// Signed out pages have no dock, so the theme toggle floats in the corner
 function PublicRoute({ children }) {
   return (
     <>

@@ -5,9 +5,9 @@ import { useTheme } from '../../context/ThemeContext'
 import { getDashboard } from '../../api/reports'
 import api from '../../api/client'
 import { chartColors } from '../../components/chartTheme'
-import Icon from '../../components/Icon'
+import ThemeToggle from '../../components/ThemeToggle'
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine, PieChart, Pie, Cell,
 } from 'recharts'
 import './dashboard.css'
@@ -19,6 +19,7 @@ const RANGES = [
   { key: 'all', label: 'All time' },
 ]
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack']
+const MEAL_EMOJI = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' }
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 // ---------- small helpers ----------
@@ -36,14 +37,15 @@ function toIso(date) {
 const fmtShort = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 const fmtLong = d => d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 const fmtNum = n => Math.round(n).toLocaleString('en-US')
-// Round the top of the y axis up to a tidy number (1.1x headroom, then 1, 2 or 5 steps)
+const litres = ml => (ml / 1000).toFixed(1)
+
+// Round the top of the y axis up to a tidy number
 function niceMax(value) {
   const target = Math.max(value, 1) * 1.1
   const pow = Math.pow(10, Math.floor(Math.log10(target)))
   const step = [1, 2, 2.5, 5, 10].map(m => m * pow).find(st => st * 4 >= target) / 4
   return Math.ceil(target / step) * step
 }
-const litres = ml => (ml / 1000).toFixed(1)
 
 function getTimeOfDay() {
   const h = new Date().getHours()
@@ -52,14 +54,41 @@ function getTimeOfDay() {
   return 'evening'
 }
 
-function deltaText(current, previous, rangeKey) {
+function delta(current, previous, rangeKey) {
   if (rangeKey === 'all' || !previous || previous <= 0) return null
   const pct = Math.round(((current - previous) / previous) * 100)
-  if (pct === 0) return `Same as the previous ${rangeKey} days`
-  return `${pct > 0 ? 'Up' : 'Down'} ${Math.abs(pct)}% from the previous ${rangeKey} days`
+  return { pct, label: `vs the previous ${rangeKey} days` }
 }
 
-// Daily points for short ranges, weekly buckets once there are too many bars to read.
+// Numbers glide to their new value when the range changes
+function CountUp({ value, decimals = 0 }) {
+  const [shown, setShown] = useState(value)
+  const from = useRef(value)
+  useEffect(() => {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce || from.current === value) {
+      from.current = value
+      setShown(value)
+      return
+    }
+    const start = from.current
+    const t0 = performance.now()
+    let raf
+    const tick = now => {
+      const k = Math.min(1, (now - t0) / 650)
+      const eased = 1 - Math.pow(1 - k, 3)
+      setShown(start + (value - start) * eased)
+      if (k < 1) raf = requestAnimationFrame(tick)
+      else from.current = value
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  const out = decimals ? shown.toFixed(decimals) : Math.round(shown).toLocaleString('en-US')
+  return <>{out}</>
+}
+
+// Daily points for short ranges, weekly buckets once there are too many to read.
 function buildPoints(days) {
   const daily = days.length <= 60
   if (daily) {
@@ -105,8 +134,10 @@ function buildPoints(days) {
 // ---------- pieces ----------
 
 function RangeToggle({ value, onChange }) {
+  const idx = RANGES.findIndex(r => r.key === value)
   return (
     <div className="range-toggle" role="group" aria-label="Time range">
+      <span className="range-pill" style={{ transform: `translateX(${idx * 100}%)` }} aria-hidden="true" />
       {RANGES.map(r => (
         <button
           key={r.key}
@@ -122,12 +153,15 @@ function RangeToggle({ value, onChange }) {
   )
 }
 
-function Kpi({ title, value, unit, note, delta, progress }) {
+function Kpi({ emoji, tone, title, value, decimals, unit, note, change, progress }) {
   return (
-    <div className="kpi card">
-      <div className="kpi-title">{title}</div>
+    <div className={`kpi ${tone}`}>
+      <div className="kpi-top">
+        <span className="kpi-emoji" aria-hidden="true">{emoji}</span>
+        <span className="kpi-title">{title}</span>
+      </div>
       <div className="kpi-value">
-        {value}<span className="kpi-unit">{unit}</span>
+        <CountUp value={value} decimals={decimals} /><span className="kpi-unit">{unit}</span>
       </div>
       {progress !== undefined && (
         <div
@@ -141,7 +175,11 @@ function Kpi({ title, value, unit, note, delta, progress }) {
         </div>
       )}
       <div className="kpi-note">{note}</div>
-      {delta && <div className="kpi-delta">{delta}</div>}
+      {change && (
+        <div className={`kpi-delta ${change.pct > 0 ? 'up' : change.pct < 0 ? 'down' : ''}`}>
+          {change.pct > 0 ? '▲' : change.pct < 0 ? '▼' : '='} {Math.abs(change.pct)}% <span>{change.label}</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -154,12 +192,10 @@ function ChartTooltip({ active, payload, metric, mode }) {
   return (
     <div className="chart-tooltip">
       <div className="tt-title">{p.fullLabel}</div>
-      <div className="tt-value">
+      <div className="tt-value" style={{ color: metric.color }}>
         {hasValue ? `${metric.format(value)} ${metric.unit}` : 'Nothing logged'}
       </div>
-      {mode === 'weekly' && hasValue && (
-        <div className="tt-hint">{metric.weeklyNote}</div>
-      )}
+      {mode === 'weekly' && hasValue && <div className="tt-hint">{metric.weeklyNote}</div>}
       {mode === 'daily' && <div className="tt-hint">Click to open this day</div>}
     </div>
   )
@@ -172,20 +208,20 @@ function MetricChart({ days, summary, profile, colors, navigate }) {
   const proteinTarget = profile?.protein_target_g || null
   const METRICS = {
     calories: {
-      key: 'calories', label: 'Calories', unit: 'kcal', format: v => fmtNum(v),
-      ref: summary.avg_calories || null, refLabel: 'Average', weeklyNote: 'Average on days with food logged',
+      key: 'calories', label: 'Calories', emoji: '🔥', unit: 'kcal', color: colors.calories, format: v => fmtNum(v),
+      ref: summary.avg_calories || null, refLabel: 'average', weeklyNote: 'Average on days with food logged',
     },
     protein: {
-      key: 'protein', label: 'Protein', unit: 'g', format: v => Math.round(v * 10) / 10,
-      ref: proteinTarget || summary.avg_protein || null, refLabel: proteinTarget ? 'Target' : 'Average',
+      key: 'protein', label: 'Protein', emoji: '🥩', unit: 'g', color: colors.protein, format: v => Math.round(v * 10) / 10,
+      ref: proteinTarget || summary.avg_protein || null, refLabel: proteinTarget ? 'target' : 'average',
       weeklyNote: 'Average on days with food logged',
     },
     water: {
-      key: 'water', label: 'Water', unit: 'L', format: v => v.toFixed(1),
-      ref: WATER_GOAL_ML / 1000, refLabel: 'Goal', weeklyNote: 'Average on days with water logged',
+      key: 'water', label: 'Water', emoji: '💧', unit: 'L', color: colors.water, format: v => v.toFixed(1),
+      ref: WATER_GOAL_ML / 1000, refLabel: 'goal', weeklyNote: 'Average on days with water logged',
     },
     exercise: {
-      key: 'exercise', label: 'Exercise', unit: 'min', format: v => fmtNum(v),
+      key: 'exercise', label: 'Exercise', emoji: '🏃‍♀️', unit: 'min', color: colors.exercise, format: v => fmtNum(v),
       ref: null, refLabel: '', weeklyNote: 'Total for the week',
     },
   }
@@ -195,21 +231,37 @@ function MetricChart({ days, summary, profile, colors, navigate }) {
     ? (metricKey === 'exercise' ? 'Minutes per week' : 'Weekly average per day')
     : 'Per day'
 
-  const onBarClick = entry => {
-    if (mode !== 'daily') return
-    const date = entry?.payload?.date || entry?.date
-    if (date) navigate(`/log?date=${date}`)
+  const openPoint = pt => {
+    if (mode !== 'daily' || !pt) return
+    navigate(`/log?date=${pt.date}`)
   }
 
   const tick = { fill: colors.muted, fontSize: 12 }
+  const common = { data: points, margin: { top: 12, right: 8, left: -8, bottom: 0 } }
+  const axes = (
+    <>
+      <CartesianGrid stroke={colors.grid} vertical={false} />
+      <XAxis dataKey="label" tick={tick} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={18} />
+      <YAxis
+        tick={tick}
+        axisLine={false}
+        tickLine={false}
+        width={44}
+        domain={[0, dataMax => niceMax(Math.max(dataMax, metric.ref || 0))]}
+      />
+      <Tooltip cursor={{ stroke: metric.color, strokeOpacity: 0.35, fill: colors.cursor }} content={<ChartTooltip metric={metric} mode={mode} />} />
+      {metric.ref && <ReferenceLine y={metric.ref} stroke={colors.muted} strokeDasharray="4 4" />}
+    </>
+  )
+
   return (
-    <div className="card chart-card">
+    <div className="card chart-card" style={{ '--mc': metric.color }}>
       <div className="card-head">
         <div>
-          <h2>{metric.label}</h2>
+          <h2>{metric.emoji} {metric.label}</h2>
           <p>
             {heading}
-            {metric.ref ? `. Dashed line: ${metric.refLabel.toLowerCase()} ${metric.format(metric.ref)} ${metric.unit}` : ''}
+            {metric.ref ? `. Dashed line is your ${metric.refLabel}, ${metric.format(metric.ref)} ${metric.unit}` : ''}
           </p>
         </div>
         <div className="metric-tabs" role="tablist" aria-label="Metric">
@@ -220,6 +272,7 @@ function MetricChart({ days, summary, profile, colors, navigate }) {
               role="tab"
               aria-selected={metricKey === m.key}
               className={metricKey === m.key ? 'active' : ''}
+              style={{ '--tc': m.color }}
               onClick={() => setMetricKey(m.key)}
             >
               {m.label}
@@ -229,45 +282,45 @@ function MetricChart({ days, summary, profile, colors, navigate }) {
       </div>
 
       {hasAny ? (
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={points} margin={{ top: 12, right: 8, left: -8, bottom: 0 }}>
-            <CartesianGrid stroke={colors.grid} vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={tick}
-              axisLine={{ stroke: colors.grid }}
-              tickLine={false}
-              interval="preserveStartEnd"
-              minTickGap={18}
-            />
-            <YAxis
-              tick={tick}
-              axisLine={false}
-              tickLine={false}
-              width={44}
-              domain={[0, dataMax => niceMax(Math.max(dataMax, metric.ref || 0))]}
-            />
-            <Tooltip
-              cursor={{ fill: colors.cursor }}
-              content={<ChartTooltip metric={metric} mode={mode} />}
-            />
-            {metric.ref && (
-              <ReferenceLine
-                y={metric.ref}
-                stroke={colors.ref}
-                strokeDasharray="4 4"
+        <ResponsiveContainer width="100%" height={270} key={metricKey}>
+          {metricKey === 'exercise' ? (
+            <BarChart {...common}>
+              {axes}
+              <Bar
+                dataKey="exercise"
+                fill={metric.color}
+                radius={[5, 5, 0, 0]}
+                maxBarSize={22}
+                onClick={entry => openPoint(entry?.payload || entry)}
+                style={mode === 'daily' ? { cursor: 'pointer' } : undefined}
+                animationDuration={700}
               />
-            )}
-            <Bar
-              dataKey={metric.key}
-              fill={colors.accent}
-              radius={[3, 3, 0, 0]}
-              maxBarSize={22}
-              onClick={onBarClick}
+            </BarChart>
+          ) : (
+            <AreaChart
+              {...common}
+              onClick={state => openPoint(points[Number(state?.activeTooltipIndex)])}
               style={mode === 'daily' ? { cursor: 'pointer' } : undefined}
-              isAnimationActive={false}
-            />
-          </BarChart>
+            >
+              <defs>
+                <linearGradient id={`grad-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={metric.color} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={metric.color} stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              {axes}
+              <Area
+                type="monotone"
+                dataKey={metricKey}
+                stroke={metric.color}
+                strokeWidth={2.5}
+                fill={`url(#grad-${metricKey})`}
+                dot={mode === 'daily' && points.length <= 31 ? { r: 3, fill: metric.color, strokeWidth: 0 } : false}
+                activeDot={{ r: 6, stroke: colors.surface, strokeWidth: 2, fill: metric.color }}
+                animationDuration={800}
+              />
+            </AreaChart>
+          )}
         </ResponsiveContainer>
       ) : (
         <div className="chart-empty">
@@ -286,7 +339,7 @@ function Highlights({ data, profile }) {
   const proteinHits = target ? foodDays.filter(d => d.protein >= target).length : null
   const waterHits = waterDays.filter(d => d.water_ml >= WATER_GOAL_ML).length
 
-  // best weekday for exercise, by average minutes across all of that weekday's days in range
+  // best weekday for exercise, by average minutes across that weekday's days in range
   const perDay = Array.from({ length: 7 }, () => ({ mins: 0, n: 0 }))
   days.forEach(d => {
     const w = parseDate(d.date).getDay()
@@ -301,30 +354,31 @@ function Highlights({ data, profile }) {
     }
   })
 
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
   const rows = [
-    ['Current streak', `${streak.current} ${streak.current === 1 ? 'day' : 'days'}`, `Longest ${streak.longest}`],
-    ['Days logged', `${summary.days_logged} of ${summary.days_in_range} days`,
-      summary.days_in_range ? `${Math.round((summary.days_logged / summary.days_in_range) * 100)}%` : ''],
+    { emoji: '🔥', tone: 'peach', label: 'Current streak', value: `${streak.current} ${streak.current === 1 ? 'day' : 'days'}`, sub: `Longest ${streak.longest}` },
+    { emoji: '📅', tone: 'rose', label: 'Days logged', value: `${summary.days_logged} of ${summary.days_in_range}`, bar: pct(summary.days_logged, summary.days_in_range) },
   ]
-  const pct = (a, b) => (b ? `${Math.round((a / b) * 100)}%` : '')
-  if (proteinHits !== null) rows.push(['Protein target met', `${proteinHits} of ${foodDays.length} days`, pct(proteinHits, foodDays.length)])
-  rows.push([`Water goal met (${litres(WATER_GOAL_ML)} L)`, `${waterHits} of ${waterDays.length} days`, pct(waterHits, waterDays.length)])
-  if (best) rows.push(['Most active day', best.day, `${Math.round(best.avg)} min on average`])
+  if (proteinHits !== null) rows.push({ emoji: '🥩', tone: 'lav', label: 'Protein target met', value: `${proteinHits} of ${foodDays.length} days`, bar: pct(proteinHits, foodDays.length) })
+  rows.push({ emoji: '💧', tone: 'water', label: `Water goal met (${litres(WATER_GOAL_ML)} L)`, value: `${waterHits} of ${waterDays.length} days`, bar: pct(waterHits, waterDays.length) })
+  if (best) rows.push({ emoji: '🏃‍♀️', tone: 'mint', label: 'Most active day', value: best.day, sub: `${Math.round(best.avg)} min on average` })
 
   return (
     <div className="card highlights">
-      <div className="card-head"><div><h2>Highlights</h2></div></div>
-      <dl>
-        {rows.map(([label, value, sub]) => (
-          <div key={label} className="hl-row">
-            <dt>{label}</dt>
-            <dd>
-              <strong>{value}</strong>
-              {sub && <span>{sub}</span>}
-            </dd>
-          </div>
+      <div className="card-head"><div><h2>✨ Highlights</h2></div></div>
+      <ul>
+        {rows.map(r => (
+          <li key={r.label} className={`hl-row ${r.tone}`}>
+            <span className="hl-emoji" aria-hidden="true">{r.emoji}</span>
+            <div className="hl-body">
+              <span className="hl-label">{r.label}</span>
+              <strong>{r.value}</strong>
+              {r.bar !== undefined && <span className="hl-bar"><span style={{ width: `${r.bar}%` }} /></span>}
+              {r.sub && <span className="hl-sub">{r.sub}</span>}
+            </div>
+          </li>
         ))}
-      </dl>
+      </ul>
     </div>
   )
 }
@@ -333,40 +387,46 @@ function MealSplit({ byMeal, colors }) {
   const [active, setActive] = useState(null)
   const total = MEALS.reduce((a, m) => a + (byMeal[m] || 0), 0)
   const data = MEALS.map((m, i) => ({
+    key: m,
     name: m.charAt(0).toUpperCase() + m.slice(1),
     value: byMeal[m] || 0,
     color: colors.meals[i],
   }))
   return (
     <div className="card split-card">
-      <div className="card-head"><div><h2>Calories by meal</h2><p>Where your calories come from</p></div></div>
+      <div className="card-head"><div><h2>🍽️ Calories by meal</h2><p>Where your calories come from</p></div></div>
       {total === 0 ? (
         <div className="chart-empty small">No food logged in this period.</div>
       ) : (
         <div className="split-body">
           <div className="donut" onMouseLeave={() => setActive(null)}>
-            <ResponsiveContainer width="100%" height={170}>
+            <ResponsiveContainer width="100%" height={180}>
               <PieChart>
                 <Pie
                   data={data}
                   dataKey="value"
-                  innerRadius={52}
-                  outerRadius={78}
-                  paddingAngle={2}
-                  stroke={colors.surface}
-                  strokeWidth={2}
-                  isAnimationActive={false}
+                  innerRadius={56}
+                  outerRadius={82}
+                  paddingAngle={3}
+                  cornerRadius={5}
+                  stroke="none"
+                  animationDuration={700}
                   onMouseEnter={(_, i) => setActive(i)}
                 >
                   {data.map((d, i) => (
-                    <Cell key={d.name} fill={d.color} fillOpacity={active === null || active === i ? 1 : 0.35} />
+                    <Cell
+                      key={d.name}
+                      fill={d.color}
+                      fillOpacity={active === null || active === i ? 1 : 0.3}
+                      style={{ transition: 'fill-opacity 0.2s', outline: 'none' }}
+                    />
                   ))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="donut-center">
               <strong>{active === null ? fmtNum(total) : fmtNum(data[active].value)}</strong>
-              <span>{active === null ? 'kcal total' : data[active].name}</span>
+              <span>{active === null ? 'kcal total' : `${MEAL_EMOJI[data[active].key]} ${data[active].name}`}</span>
             </div>
           </div>
           <ul className="split-legend">
@@ -390,22 +450,23 @@ function MealSplit({ byMeal, colors }) {
   )
 }
 
-function TopList({ title, subtitle, rows, valueOf, noteOf, empty }) {
+function TopList({ title, subtitle, rows, valueOf, noteOf, empty, tone }) {
   const max = Math.max(1, ...rows.map(valueOf))
   return (
-    <div className="card toplist">
+    <div className={`card toplist ${tone}`}>
       <div className="card-head"><div><h2>{title}</h2><p>{subtitle}</p></div></div>
       {rows.length === 0 ? (
         <div className="chart-empty small">{empty}</div>
       ) : (
         <ol>
-          {rows.map(r => (
+          {rows.map((r, i) => (
             <li key={r.name}>
               <div className="tl-top">
+                <span className="tl-rank">{i + 1}</span>
                 <span className="tl-name">{r.name}</span>
                 <span className="tl-note">{noteOf(r)}</span>
               </div>
-              <div className="tl-bar"><span style={{ width: `${(valueOf(r) / max) * 100}%` }} /></div>
+              <div className="tl-bar"><span style={{ width: `${(valueOf(r) / max) * 100}%`, animationDelay: `${i * 70}ms` }} /></div>
             </li>
           ))}
         </ol>
@@ -462,8 +523,8 @@ function Heatmap({ allDays, endDate, target, navigate }) {
     <div className="card heatmap-card">
       <div className="card-head">
         <div>
-          <h2>Last {WEEKS} weeks</h2>
-          <p>Each square is a day. Darker means more of your daily goals were met. Click a day to open it.</p>
+          <h2>🗓️ Last {WEEKS} weeks</h2>
+          <p>Each square is a day. Brighter means more of your daily goals were met. Click a day to open it.</p>
         </div>
       </div>
       <div className="heatmap-body">
@@ -510,10 +571,10 @@ function Heatmap({ allDays, endDate, target, navigate }) {
             <>
               <div className="hm-readout-goals">{goalsMet(d).score} of {goalsMet(d).total} goals met</div>
               <dl>
-                <div><dt>Calories</dt><dd>{fmtNum(d.calories)} kcal</dd></div>
-                <div><dt>Protein</dt><dd>{Math.round(d.protein)} g</dd></div>
-                <div><dt>Water</dt><dd>{litres(d.water_ml)} L</dd></div>
-                <div><dt>Exercise</dt><dd>{d.exercise_mins} min</dd></div>
+                <div className="cal"><dt>🔥 Calories</dt><dd>{fmtNum(d.calories)} kcal</dd></div>
+                <div className="pro"><dt>🥩 Protein</dt><dd>{Math.round(d.protein)} g</dd></div>
+                <div className="wat"><dt>💧 Water</dt><dd>{litres(d.water_ml)} L</dd></div>
+                <div className="exe"><dt>🏃‍♀️ Exercise</dt><dd>{d.exercise_mins} min</dd></div>
               </dl>
             </>
           ) : (
@@ -533,7 +594,7 @@ function Heatmap({ allDays, endDate, target, navigate }) {
 // ---------- page ----------
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const { isDark } = useTheme()
   const navigate = useNavigate()
   const colors = chartColors(isDark)
@@ -581,6 +642,7 @@ export default function Dashboard() {
 
   const data = cache[range]
   const all = cache.all
+  const todayRow = all?.days?.[all.days.length - 1]
 
   let subtitle = ''
   if (data) {
@@ -588,7 +650,7 @@ export default function Dashboard() {
     const end = parseDate(data.end_date)
     subtitle = range === 'all'
       ? (data.summary.days_logged
-          ? `Everything you have logged since ${fmtShort(start)}, ${start.getFullYear()} (${data.summary.days_logged} days)`
+          ? `Everything you have logged since ${fmtShort(start)}, ${start.getFullYear()} · ${data.summary.days_logged} days`
           : 'Nothing logged yet')
       : `${fmtShort(start)} to ${fmtShort(end)}`
   }
@@ -596,68 +658,100 @@ export default function Dashboard() {
   const s = data?.summary
   const prev = data?.previous
   const target = profile?.protein_target_g
+  const isDemo = user?.email === 'jane.demo@example.com'
 
   return (
-    <div className="page dashboard">
-      <div className="page-head">
+    <div className="dashboard">
+      <div className="dashboard-header">
         <div>
           <h1>Good {getTimeOfDay()}{user?.username ? `, ${user.username}` : ''}</h1>
           <p>{subtitle || ' '}</p>
         </div>
-        <RangeToggle value={range} onChange={setRange} />
+        <div className="header-actions">
+          {isDemo && <span className="demo-tag">✨ Demo account</span>}
+          <ThemeToggle variant="inline" />
+          <button className="btn-logout" onClick={logout}>Sign out</button>
+        </div>
       </div>
 
       {showInstall && (
         <div className="install-banner">
-          <span>Add PCOS Tracker to your home screen</span>
+          <span>📱 Add PCOS Tracker to your home screen</span>
           <button onClick={installApp}>Install</button>
         </div>
       )}
 
+      {profile && (
+        <div className="metrics-row">
+          <div className="metric-card tone-peach">
+            <span className="metric-icon">⚖️</span>
+            <div>
+              <span className="metric-value">{profile.bmi || '-'}</span>
+              <span className="metric-label">BMI</span>
+            </div>
+          </div>
+          <div className="metric-card tone-lav">
+            <span className="metric-icon">🥩</span>
+            <div>
+              <span className="metric-value">{profile.protein_target_g || '-'}g</span>
+              <span className="metric-label">Daily protein target</span>
+            </div>
+          </div>
+          <div className="metric-card tone-mint">
+            <span className="metric-icon">🍽️</span>
+            <div>
+              <span className="metric-value">{profile.per_meal_protein_g || '-'}g</span>
+              <span className="metric-label">Per meal protein</span>
+            </div>
+          </div>
+          {todayRow && (
+            <div className="metric-card highlight tone-rose">
+              <span className="metric-icon">📊</span>
+              <div>
+                <span className="metric-value">{fmtNum(todayRow.calories)}</span>
+                <span className="metric-label">Calories today</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="section-bar">
+        <h2>Your numbers</h2>
+        <RangeToggle value={range} onChange={setRange} />
+      </div>
+
       {error && !data && <div className="dash-error">{error}</div>}
-      {!data && !error && <div className="dash-loading">Loading your dashboard...</div>}
+      {!data && !error && <div className="dash-loading"><span className="dash-spinner" />Loading your dashboard...</div>}
 
       {data && (
         <>
-          {profile && (profile.bmi || target) && (
-            <p className="numbers-line">
-              {profile.bmi ? <>BMI <strong>{profile.bmi}</strong></> : null}
-              {profile.bmi && target ? <span className="sep">|</span> : null}
-              {target ? <>Protein target <strong>{target} g</strong> a day</> : null}
-              {profile.per_meal_protein_g ? <><span className="sep">|</span><strong>{profile.per_meal_protein_g} g</strong> per meal</> : null}
-            </p>
-          )}
-
           <div className="kpi-row">
             <Kpi
-              title="Calories"
-              value={fmtNum(s.avg_calories)}
-              unit=" kcal a day"
+              emoji="🔥" tone="peach" title="Calories"
+              value={s.avg_calories} unit=" kcal a day"
               note="Average on days with food logged"
-              delta={deltaText(s.avg_calories, prev?.avg_calories, range)}
+              change={delta(s.avg_calories, prev?.avg_calories, range)}
             />
             <Kpi
-              title="Protein"
-              value={Math.round(s.avg_protein)}
-              unit=" g a day"
+              emoji="🥩" tone="lav" title="Protein"
+              value={s.avg_protein} unit=" g a day"
               progress={target ? (s.avg_protein / target) * 100 : undefined}
               note={target ? `${Math.round((s.avg_protein / target) * 100)}% of your ${target} g target` : 'Add your weight in Profile for a target'}
-              delta={deltaText(s.avg_protein, prev?.avg_protein, range)}
+              change={delta(s.avg_protein, prev?.avg_protein, range)}
             />
             <Kpi
-              title="Water"
-              value={litres(s.avg_water_ml)}
-              unit=" L a day"
+              emoji="💧" tone="water" title="Water"
+              value={s.avg_water_ml / 1000} decimals={1} unit=" L a day"
               progress={(s.avg_water_ml / WATER_GOAL_ML) * 100}
               note={`${Math.round((s.avg_water_ml / WATER_GOAL_ML) * 100)}% of your ${litres(WATER_GOAL_ML)} L goal`}
-              delta={deltaText(s.avg_water_ml, prev?.avg_water_ml, range)}
+              change={delta(s.avg_water_ml, prev?.avg_water_ml, range)}
             />
             <Kpi
-              title="Exercise"
-              value={fmtNum(s.total_exercise_mins)}
-              unit=" min"
+              emoji="🏃‍♀️" tone="mint" title="Exercise"
+              value={s.total_exercise_mins} unit=" min"
               note={`Active on ${s.active_days} of ${s.days_in_range} days`}
-              delta={deltaText(s.total_exercise_mins, prev?.total_exercise_mins, range)}
+              change={delta(s.total_exercise_mins, prev?.total_exercise_mins, range)}
             />
           </div>
 
@@ -669,7 +763,8 @@ export default function Dashboard() {
           <div className="trio-grid">
             <MealSplit byMeal={data.by_meal} colors={colors} />
             <TopList
-              title="Most logged foods"
+              tone="peach"
+              title="🥗 Most logged foods"
               subtitle="By number of times logged"
               rows={data.top_foods}
               valueOf={r => r.count}
@@ -677,11 +772,12 @@ export default function Dashboard() {
               empty="No food logged in this period."
             />
             <TopList
-              title="Workouts"
+              tone="mint"
+              title="💪 Workouts"
               subtitle="By total minutes"
               rows={data.top_exercises}
               valueOf={r => r.minutes}
-              noteOf={r => `${r.minutes} min, ${r.count} ${r.count === 1 ? 'session' : 'sessions'}`}
+              noteOf={r => `${r.minutes} min · ${r.count} ${r.count === 1 ? 'session' : 'sessions'}`}
               empty="No exercise logged in this period."
             />
           </div>
@@ -689,6 +785,29 @@ export default function Dashboard() {
           {all && <Heatmap allDays={all.days} endDate={all.end_date} target={target} navigate={navigate} />}
         </>
       )}
+
+      <div className="nav-grid">
+        <Link to="/log" className="nav-card n-rose">
+          <span className="nav-icon">📋</span>
+          <span className="nav-label">Daily Log</span>
+        </Link>
+        <Link to="/meals" className="nav-card n-mint">
+          <span className="nav-icon">🥗</span>
+          <span className="nav-label">Meal Plan</span>
+        </Link>
+        <Link to="/exercise" className="nav-card n-gold">
+          <span className="nav-icon">🏃‍♀️</span>
+          <span className="nav-label">Exercise</span>
+        </Link>
+        <Link to="/onboarding" className="nav-card n-lav">
+          <span className="nav-icon">⚙️</span>
+          <span className="nav-label">Profile</span>
+        </Link>
+        <Link to="/settings" className="nav-card n-water">
+          <span className="nav-icon">🔔</span>
+          <span className="nav-label">Settings</span>
+        </Link>
+      </div>
     </div>
   )
 }

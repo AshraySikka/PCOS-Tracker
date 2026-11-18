@@ -1,7 +1,29 @@
 import { useState, useEffect } from 'react'
 import { generateMealPlan, getCurrentMealPlan } from '../../api/meals'
-import Icon from '../../components/Icon'
 import './meals.css'
+
+
+const MEAL_ICONS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙' }
+
+// Shows the photo when there is one. If the link is empty or fails to load,
+// a coloured card with the meal emoji takes its place.
+function MealImage({ meal }) {
+  const [failed, setFailed] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  if (!meal.image_url || failed) {
+    return <div className="meal-image-placeholder">{MEAL_ICONS[meal.meal_type]}</div>
+  }
+  return (
+    <img
+      src={meal.image_url}
+      alt={meal.name}
+      className={`meal-image ${loaded ? 'loaded' : ''}`}
+      loading="lazy"
+      onLoad={() => setLoaded(true)}
+      onError={() => setFailed(true)}
+    />
+  )
+}
 
 export default function Meals() {
   const [plan, setPlan] = useState(null)
@@ -41,16 +63,16 @@ export default function Meals() {
     <div className="meals-page">
       <div className="meals-header">
         <div>
-          <h1>Meal plan</h1>
+          <h1>Your Meal Plan</h1>
           {plan && (
-            <p>{plan.daily_protein_target}g protein a day, {plan.per_meal_protein}g per meal</p>
+            <p>{plan.daily_protein_target}g protein daily · {plan.per_meal_protein}g per meal</p>
           )}
         </div>
         <button className="btn-generate" onClick={generate} disabled={generating}>
           {generating ? (
             <><span className="spinner" />Generating...</>
           ) : (
-            <>{plan ? 'Regenerate' : 'Generate plan'}</>
+            <>{plan ? '✨ Regenerate' : '✨ Generate Plan'}</>
           )}
         </button>
       </div>
@@ -60,17 +82,18 @@ export default function Meals() {
       {generating && (
         <div className="generating-state">
           <div className="generating-spinner" />
-          <p>Building your meal plan...</p>
+          <p>Your AI nutritionist is crafting your personalised meal plan...</p>
           <span>This takes about 15-20 seconds</span>
         </div>
       )}
 
       {!generating && !plan && (
         <div className="empty-state">
+          <div className="empty-icon">🥗</div>
           <h2>No meal plan yet</h2>
-          <p>Generate a meal plan built around your profile and the foods you already eat.</p>
+          <p>Generate your personalised 7-day PCOS-friendly meal plan based on your profile</p>
           <button className="btn-generate-large" onClick={generate}>
-            Generate my meal plan
+            ✨ Generate My Meal Plan
           </button>
         </div>
       )}
@@ -91,15 +114,9 @@ export default function Meals() {
 
           <div className="meals-grid">
             {activeDayData?.meals?.map(meal => (
-              <div key={meal.id} className="meal-card">
+              <div key={meal.id} className={`meal-card ${meal.meal_type}`}>
                 <div className="meal-image-wrapper">
-                  {meal.image_url ? (
-                    <img src={meal.image_url} alt={meal.name} className="meal-image" />
-                  ) : (
-                    <div className="meal-image-placeholder">
-                      <Icon name="meals" size={30} />
-                    </div>
-                  )}
+                  <MealImage meal={meal} />
                   <span className="meal-type-badge">{meal.meal_type}</span>
                 </div>
                 <div className="meal-content">

@@ -8,6 +8,12 @@ never empty.
 import random
 from datetime import datetime, time, timedelta, timezone as dt_timezone
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover
+    ZoneInfo = None
+
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone as dj_timezone
 
@@ -73,8 +79,16 @@ WORKOUTS = [
 ]
 
 
+# Entry times are written as Toronto local time so the Log page shows
+# believable clock times (8:20 AM, not 3:20 AM) to visitors in that area.
+try:
+    DEMO_TZ = ZoneInfo('America/Toronto')
+except Exception:  # tz database missing, fall back to a fixed winter offset
+    DEMO_TZ = dt_timezone(timedelta(hours=-5))
+
+
 def _at(day, hour, minute):
-    return datetime.combine(day, time(hour, minute), tzinfo=dt_timezone.utc)
+    return datetime.combine(day, time(hour, minute), tzinfo=DEMO_TZ).astimezone(dt_timezone.utc)
 
 
 def _day_rows(day, index, total, rng):
@@ -115,6 +129,13 @@ def _day_rows(day, index, total, rng):
 @transaction.atomic
 def seed_demo_data(user, today=None, days=SEED_DAYS):
     today = today or dj_timezone.now().date()
+
+    # Keep any meal photos we already fetched so a reseed does not hit the
+    # photo service again.
+    known_photos = {
+        m.name: m.image_url
+        for m in Meal.objects.filter(day__plan__user=user) if m.image_url
+    }
 
     # Start clean so the seed can be re-run safely.
     DailyLog.objects.filter(user=user).delete()
@@ -175,7 +196,7 @@ def seed_demo_data(user, today=None, days=SEED_DAYS):
     # created_at is auto_now_add, so spread the timestamps out afterwards.
     # The Log page shows the time of each water entry.
     _spread_timestamps(user)
-    _seed_plans(user)
+    _seed_plans(user, known_photos)
     return len(logs)
 
 
@@ -205,7 +226,31 @@ def _spread_timestamps(user):
     WaterEntry.objects.bulk_update(water_rows, ['created_at'], batch_size=500)
 
 
-def _seed_plans(user):
+class _Photos:
+    """Looks up a food photo through the same Unsplash helper the real meal
+    plans use. It gives up after the first miss so a missing key or a network
+    problem never slows the demo down."""
+
+    def __init__(self, known):
+        self.known = known
+        self.enabled = getattr(settings, 'DEMO_FETCH_IMAGES', True)
+
+    def get(self, name):
+        if name in self.known:
+            return self.known[name]
+        if not self.enabled:
+            return ''
+        from meals.unsplash_service import fetch_food_image
+        url = fetch_food_image(f'{name} food photo')
+        if not url:
+            self.enabled = False
+        else:
+            self.known[name] = url
+        return url
+
+
+def _seed_plans(user, known_photos=None):
+    photos = _Photos(known_photos or {})
     plan = MealPlan.objects.create(user=user, week_start='Monday', daily_protein_target=68, per_meal_protein=23)
     meal_days = [
         ('Monday', [
@@ -230,6 +275,7 @@ def _seed_plans(user):
             Meal.objects.create(
                 day=md, meal_type=mtype, name=name, description=desc,
                 protein_g=protein, calories=kcal, ingredients=ingredients,
+                image_url=photos.get(name), image_query=name,
             )
 
     ex_plan = ExercisePlan.objects.create(

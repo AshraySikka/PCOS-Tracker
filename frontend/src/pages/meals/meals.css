@@ -1,162 +1,375 @@
-.meals-page { max-width: 1000px; margin: 0 auto; padding: 28px 24px 56px; }
+.meals-page {
+  min-height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  padding: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
 
 .meals-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  margin-bottom: 22px;
+  align-items: flex-start;
+  margin-bottom: 40px;
 }
-.meals-header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
-.meals-header p { color: var(--text-2); font-size: 14px; margin-top: 4px; }
+
+.meals-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  margin: 0 0 8px;
+}
+
+.meals-header p {
+  font-size: 14px;
+  color: color-mix(in srgb, var(--text) 40%, transparent);
+  margin: 0;
+}
 
 .btn-generate {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
   background: var(--accent);
   color: var(--accent-ink);
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 9px 18px;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
   white-space: nowrap;
 }
-.btn-generate:hover { background: var(--accent-hover); }
+
+.btn-generate:hover { opacity: 0.9; }
 .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
+  border: 2px solid color-mix(in srgb, var(--accent-ink) 30%, transparent);
+  border-top-color: var(--accent-ink);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .meals-error {
-  background: var(--danger-soft);
-  border: 1px solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 20%, transparent);
+  border-radius: 12px;
+  padding: 14px 18px;
   color: var(--danger);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
   font-size: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
-.meals-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; color: var(--text-3); }
+
+.meals-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: color-mix(in srgb, var(--text) 40%, transparent);
+  font-family: 'DM Sans', sans-serif;
+}
 
 .generating-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 72px 0;
+  justify-content: center;
+  padding: 80px 40px;
   text-align: center;
+  gap: 16px;
 }
+
 .generating-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border);
+  width: 48px;
+  height: 48px;
+  border: 3px solid color-mix(in srgb, var(--accent) 20%, transparent);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-.generating-state p { font-size: 16px; }
-.generating-state span { font-size: 13px; color: var(--text-3); }
+
+.generating-state p {
+  font-size: 16px;
+  color: var(--text);
+  margin: 0;
+}
+
+.generating-state span {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--text) 30%, transparent);
+}
 
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  padding: 80px 40px;
   text-align: center;
-  padding: 64px 20px;
-  background: var(--surface);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius);
+  gap: 16px;
 }
-.empty-state h2 { font-size: 20px; font-weight: 600; }
-.empty-state p { font-size: 14.5px; color: var(--text-2); max-width: 380px; }
+
+.empty-icon { font-size: 48px; }
+
+.empty-state h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  margin: 0;
+}
+
+.empty-state p {
+  font-size: 15px;
+  color: color-mix(in srgb, var(--text) 40%, transparent);
+  max-width: 400px;
+  margin: 0;
+}
+
 .btn-generate-large {
-  margin-top: 8px;
   background: var(--accent);
   color: var(--accent-ink);
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 11px 22px;
-  font-size: 15px;
-  font-weight: 600;
-}
-.btn-generate-large:hover { background: var(--accent-hover); }
-
-.day-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 22px; overflow-x: auto; }
-.day-tab {
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  padding: 9px 16px;
-  font-size: 14.5px;
+  border-radius: 14px;
+  padding: 16px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
   font-weight: 500;
-  color: var(--text-3);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+
+.btn-generate-large:hover { opacity: 0.9; }
+
+.day-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.day-tab {
+  background: var(--glass-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: color-mix(in srgb, var(--text) 50%, transparent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
   white-space: nowrap;
 }
-.day-tab:hover { color: var(--text); }
-.day-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-.meals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.day-tab:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text);
+}
+
+.day-tab.active {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.meals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
 
 .meal-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 20px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  transition: border-color 0.2s;
 }
-.meal-image-wrapper { position: relative; height: 150px; background: var(--surface-2); }
-.meal-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.meal-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.meal-image-wrapper {
+  position: relative;
+  height: 180px;
+}
+
+.meal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .meal-image-placeholder {
   width: 100%;
   height: 100%;
+  background: var(--glass-2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-3);
+  font-size: 48px;
 }
+
 .meal-type-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: var(--surface);
-  color: var(--text-2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
+  top: 12px;
+  left: 12px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
 }
 
-.meal-content { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.meal-content h3 { font-size: 16px; font-weight: 600; line-height: 1.3; }
-.meal-content p { font-size: 13.5px; color: var(--text-2); }
+.meal-content {
+  padding: 20px;
+}
 
-.meal-macros { display: flex; gap: 12px; font-size: 13px; font-weight: 600; }
-.macro.protein { color: var(--accent); }
-.macro.calories { color: var(--text-2); }
+.meal-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  margin: 0 0 6px;
+  color: var(--text);
+}
 
-.meal-ingredients { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 4px; }
+.meal-content p {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--text) 40%, transparent);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.meal-macros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.macro {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.macro.protein {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+.macro.calories {
+  background: color-mix(in srgb, var(--c-mint) 10%, transparent);
+  color: color-mix(in srgb, var(--c-mint) 80%, transparent);
+}
+
+.meal-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .ingredient {
-  font-size: 12px;
-  color: var(--text-2);
-  background: var(--surface-2);
-  border-radius: 4px;
-  padding: 2px 8px;
+  font-size: 11px;
+  background: var(--glass-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 8px;
+  color: color-mix(in srgb, var(--text) 50%, transparent);
 }
 
-@media (max-width: 720px) {
-  .meals-page { padding: 20px 16px 32px; }
-  .meals-header { flex-direction: column; align-items: flex-start; }
+@media (max-width: 768px) {
+  .meals-page { padding: 24px 16px; }
+  .meals-header { flex-direction: column; gap: 16px; }
+  .meals-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------
+   Colour, depth and motion
+---------------------------------------------------------------- */
+.meals-header h1 { font-size: 36px; letter-spacing: -0.01em; }
+
+.btn-generate, .btn-generate-large {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 28%, transparent);
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+}
+.btn-generate:hover:not(:disabled), .btn-generate-large:hover { opacity: 1; transform: translateY(-2px); box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 38%, transparent); }
+
+.day-tab { transition: all 0.2s; }
+.day-tab:hover { transform: translateY(-1px); }
+.day-tab.active { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 22%, transparent); }
+
+.meal-card {
+  --mc: var(--accent);
+  background: var(--glass);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s, box-shadow 0.25s;
+  animation: cardRise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.meal-card.breakfast { --mc: var(--c-gold); }
+.meal-card.lunch { --mc: var(--c-peach); animation-delay: 0.07s; }
+.meal-card.dinner { --mc: var(--c-lav); animation-delay: 0.14s; }
+.meal-card:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--mc) 45%, transparent);
+  box-shadow: var(--card-shadow-hover), 0 0 0 1px color-mix(in srgb, var(--mc) 20%, transparent);
+}
+@keyframes cardRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+.meal-image-wrapper { overflow: hidden; background: color-mix(in srgb, var(--mc) 10%, transparent); }
+.meal-image { opacity: 0; transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.meal-image.loaded { opacity: 1; }
+.meal-card:hover .meal-image { transform: scale(1.07); }
+.meal-image-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 60px;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 35%, transparent));
+  pointer-events: none;
+}
+
+.meal-image-placeholder {
+  background:
+    radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--mc) 38%, transparent), transparent 60%),
+    radial-gradient(circle at 80% 85%, color-mix(in srgb, var(--c-water) 22%, transparent), transparent 55%),
+    color-mix(in srgb, var(--mc) 9%, transparent);
+  font-size: 64px;
+}
+
+.meal-type-badge {
+  z-index: 1;
+  color: var(--mc);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mc) 35%, transparent);
+}
+
+.meal-content h3 { font-weight: 600; }
+.macro.protein { background: color-mix(in srgb, var(--c-lav) 16%, transparent); color: var(--c-lav); }
+.macro.calories { background: color-mix(in srgb, var(--c-gold) 16%, transparent); color: var(--c-gold); }
+.ingredient { transition: all 0.2s; }
+.ingredient:hover { border-color: color-mix(in srgb, var(--mc) 50%, transparent); color: var(--text); }
+
+.empty-icon { font-size: 56px; animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-8px); } }
+.generating-spinner { border-color: color-mix(in srgb, var(--accent) 20%, transparent); border-top-color: var(--accent); }
+
+@media (max-width: 768px) {
+  .meals-header h1 { font-size: 30px; }
 }

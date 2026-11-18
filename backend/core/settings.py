@@ -135,3 +135,5 @@ FRONTEND_URL = os.getenv(
 ).rstrip('/')
 # The demo account cannot use the paid AI features unless this is set to True.
 DEMO_ALLOW_AI = os.getenv('DEMO_ALLOW_AI', 'False') == 'True'
+# Fetch meal photos for the demo plan from Unsplash (needs UNSPLASH_ACCESS_KEY).
+DEMO_FETCH_IMAGES = os.getenv('DEMO_FETCH_IMAGES', 'True') == 'True'

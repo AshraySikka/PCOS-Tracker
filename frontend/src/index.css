@@ -1,61 +1,4 @@
-/* Theme tokens. Every colour in the app comes from here, so one data-theme
-   attribute on <html> switches the whole UI. Edit these blocks to retheme. */
-
-:root {
-  --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --nav-h: 56px;
-  --tabbar-h: 62px;
-}
-
-:root[data-theme='light'] {
-  color-scheme: light;
-  --bg: #f3f2ef;
-  --surface: #fcfcfb;
-  --surface-2: #f5f4f1;
-  --border: #e3e1db;
-  --border-strong: #cfccc4;
-  --text: #161615;
-  --text-2: #52514e;
-  --text-3: #6b6a65;
-  --accent: #0f766e;
-  --accent-hover: #0b5f58;
-  --accent-ink: #ffffff;
-  --accent-soft: #e2f0ee;
-  --danger: #b42318;
-  --danger-soft: #fceceb;
-  --warn-soft: #fdf3dc;
-  --warn-text: #7a5200;
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --series-4: #eda100;
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --bg: #121211;
-  --surface: #1a1a19;
-  --surface-2: #222220;
-  --border: #302f2d;
-  --border-strong: #46453f;
-  --text: #f0efec;
-  --text-2: #c3c2b7;
-  --text-3: #9a988f;
-  --accent: #3fc1b3;
-  --accent-hover: #5ad0c3;
-  --accent-ink: #04201d;
-  --accent-soft: rgba(63, 193, 179, 0.14);
-  --danger: #f0897f;
-  --danger-soft: rgba(240, 137, 127, 0.12);
-  --warn-soft: rgba(237, 161, 0, 0.14);
-  --warn-text: #e8b44a;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --series-4: #c98500;
-}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -63,77 +6,139 @@
   padding: 0;
 }
 
+/* ---------------------------------------------------------------
+   Theme tokens. Dark is the original look. Light keeps the same
+   palette, just warmer and brighter, so both modes feel like one app.
+---------------------------------------------------------------- */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0d0d0d;
+  --text: #f5f0eb;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-2: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.12);
+  --line-3: rgba(255, 255, 255, 0.2);
+  --pop: rgba(20, 15, 12, 0.96);
+  --card-shadow: none;
+  --card-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.45);
+
+  --accent: #e8b4a0;
+  --accent-2: #e8a0b4;
+  --accent-ink: #1a0f0a;
+  --danger: #e87070;
+
+  --c-peach: #e8b4a0;
+  --c-water: #a0c4e8;
+  --c-rose: #e8a0b4;
+  --c-mint: #b4e8a0;
+  --c-gold: #e8d4a0;
+  --c-lav: #c4b0f0;
+
+  --glow-1: rgba(232, 180, 160, 0.13);
+  --glow-2: rgba(196, 176, 240, 0.10);
+  --glow-3: rgba(160, 196, 232, 0.09);
+  --glow-4: rgba(180, 232, 160, 0.06);
+
+  --heat-0: rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #fbf4ef;
+  --text: #2b1d18;
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-2: rgba(255, 255, 255, 0.95);
+  --line: rgba(110, 60, 40, 0.13);
+  --line-2: rgba(110, 60, 40, 0.2);
+  --line-3: rgba(110, 60, 40, 0.3);
+  --pop: rgba(255, 255, 255, 0.98);
+  --card-shadow: 0 1px 2px rgba(110, 60, 40, 0.06), 0 8px 24px rgba(110, 60, 40, 0.06);
+  --card-shadow-hover: 0 14px 36px rgba(110, 60, 40, 0.16);
+
+  --accent: #c4502f;
+  --accent-2: #c2416e;
+  --accent-ink: #ffffff;
+  --danger: #c93c3c;
+
+  --c-peach: #c4502f;
+  --c-water: #2a74c2;
+  --c-rose: #c2416e;
+  --c-mint: #1f8a58;
+  --c-gold: #a87300;
+  --c-lav: #6a4cc4;
+
+  --glow-1: rgba(255, 170, 130, 0.30);
+  --glow-2: rgba(180, 150, 255, 0.22);
+  --glow-3: rgba(120, 190, 255, 0.22);
+  --glow-4: rgba(130, 225, 170, 0.18);
+
+  --heat-0: rgba(110, 60, 40, 0.07);
+}
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font);
-  font-size: 15px;
-  line-height: 1.5;
+  font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
-button { cursor: pointer; }
-a { color: var(--accent); }
+/* Soft colour glows behind every page. Fixed so they stay put while scrolling. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 12% -5%, var(--glow-1), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 92% 8%, var(--glow-2), transparent 70%),
+    radial-gradient(ellipse 55% 50% at 88% 96%, var(--glow-3), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 4% 88%, var(--glow-4), transparent 70%);
+}
+
+button, input, select, textarea { font-family: inherit; }
+
+a { color: inherit; }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Short cross-fade when the theme is switched */
-.theme-transition, .theme-transition *, .theme-transition *::before, .theme-transition *::after {
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, fill 0.25s ease, stroke 0.25s ease !important;
-}
-
-/* Page frame shared by every signed in screen */
-.page {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 28px 24px 56px;
-}
-.page-narrow { max-width: 760px; }
-
-.page-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.page-head h1 {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.page-head p { color: var(--text-2); font-size: 14px; margin-top: 4px; }
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+/* Smooth switch between light and dark, only while toggling */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
 }
 
 .app-loading {
-  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-3);
+  min-height: 100vh;
+  color: color-mix(in srgb, var(--text) 45%, transparent);
+  font-size: 14px;
 }
 
-/* Spinner and fade used by several pages */
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-@media (max-width: 720px) {
-  .page { padding: 20px 16px 32px; }
-  .page-head { flex-direction: column; align-items: flex-start; }
-}
+/* Room under every signed in page for the floating dock */
+.has-dock { padding-bottom: 110px; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
+
+:root, :root[data-theme='dark'] { --muted-ink: rgba(245, 240, 235, 0.45); }
+:root[data-theme='light'] { --muted-ink: rgba(43, 29, 24, 0.5); }

@@ -10,3 +10,12 @@ def pytest_configure(config):
             'NAME': ':memory:',
         }
     }
+
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _no_demo_photo_fetch(settings):
+    # Never hit the photo service from tests.
+    settings.DEMO_FETCH_IMAGES = False
