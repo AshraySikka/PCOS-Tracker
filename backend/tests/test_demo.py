@@ -84,3 +84,16 @@ def test_real_user_not_blocked_from_ai(client):
         mock.return_value = {'calories': 100, 'protein_g': 5, 'notes': ''}
         res = client.post('/api/logs/food/estimate/', {'name': 'eggs'}, content_type='application/json')
     assert res.status_code == 200
+
+
+@pytest.mark.django_db
+def test_demo_login_works_when_browser_already_has_a_session():
+    from django.test import Client
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    other = User.objects.create_user(username='someone', email='someone@example.com', password='pw-12345-xyz')
+    c = Client(enforce_csrf_checks=True)
+    c.force_login(other)
+    r = c.post('/api/auth/demo-login/')
+    assert r.status_code == 200
+    assert r.json()['token']
