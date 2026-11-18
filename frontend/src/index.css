@@ -1,10 +1,139 @@
+/* Theme tokens. Every colour in the app comes from here, so one data-theme
+   attribute on <html> switches the whole UI. Edit these blocks to retheme. */
+
+:root {
+  --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --nav-h: 56px;
+  --tabbar-h: 62px;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f3f2ef;
+  --surface: #fcfcfb;
+  --surface-2: #f5f4f1;
+  --border: #e3e1db;
+  --border-strong: #cfccc4;
+  --text: #161615;
+  --text-2: #52514e;
+  --text-3: #6b6a65;
+  --accent: #0f766e;
+  --accent-hover: #0b5f58;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2f0ee;
+  --danger: #b42318;
+  --danger-soft: #fceceb;
+  --warn-soft: #fdf3dc;
+  --warn-text: #7a5200;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #121211;
+  --surface: #1a1a19;
+  --surface-2: #222220;
+  --border: #302f2d;
+  --border-strong: #46453f;
+  --text: #f0efec;
+  --text-2: #c3c2b7;
+  --text-3: #9a988f;
+  --accent: #3fc1b3;
+  --accent-hover: #5ad0c3;
+  --accent-ink: #04201d;
+  --accent-soft: rgba(63, 193, 179, 0.14);
+  --danger: #f0897f;
+  --danger-soft: rgba(240, 137, 127, 0.12);
+  --warn-soft: rgba(237, 161, 0, 0.14);
+  --warn-text: #e8b44a;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html { -webkit-text-size-adjust: 100%; }
+
 body {
-  background: #0d0d0d;
-  color: #f5f0eb;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Short cross-fade when the theme is switched */
+.theme-transition, .theme-transition *, .theme-transition *::before, .theme-transition *::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, fill 0.25s ease, stroke 0.25s ease !important;
+}
+
+/* Page frame shared by every signed in screen */
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+}
+.page-narrow { max-width: 760px; }
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.page-head h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.page-head p { color: var(--text-2); font-size: 14px; margin-top: 4px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.app-loading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+}
+
+/* Spinner and fade used by several pages */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 720px) {
+  .page { padding: 20px 16px 32px; }
+  .page-head { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

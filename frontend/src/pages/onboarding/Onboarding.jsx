@@ -73,7 +73,6 @@ export default function Onboarding() {
 
         {step === 1 && (
           <div className="step">
-            <div className="step-icon">🌸</div>
             <h2>Let's start with the basics</h2>
             <p>This helps us personalise your plan</p>
             <div className="fields">
@@ -125,9 +124,9 @@ export default function Onboarding() {
                 </div>
               </div>
               <div className="field">
-                <label>Your goal <span style={{color:'rgba(245,240,235,0.3)', fontWeight:300}}>(optional)</span></label>
+                <label>Your goal <span className="optional">(optional)</span></label>
                 <textarea
-                  placeholder="Optional — e.g. manage symptoms, lose weight, improve energy..."
+                  placeholder="e.g. manage symptoms, lose weight, improve energy"
                   value={data.goal}
                   onChange={e => update('goal', e.target.value)}
                   rows={3}
@@ -139,7 +138,6 @@ export default function Onboarding() {
 
         {step === 2 && (
           <div className="step">
-            <div className="step-icon">⚡</div>
             <h2>Activity level</h2>
             <p>How active are you on a typical week?</p>
             <div className="activity-options">
@@ -159,7 +157,6 @@ export default function Onboarding() {
 
         {step === 3 && (
           <div className="step">
-            <div className="step-icon">💫</div>
             <h2>Your symptoms</h2>
             <p>Select all that apply to you</p>
             <div className="tag-grid">
@@ -178,7 +175,6 @@ export default function Onboarding() {
 
         {step === 4 && (
           <div className="step">
-            <div className="step-icon">🍽️</div>
             <h2>Food preferences</h2>
             <p>What cuisines do you enjoy? Select all that apply</p>
             <div className="tag-grid">
@@ -197,9 +193,8 @@ export default function Onboarding() {
 
         {step === 5 && (
           <div className="step">
-            <div className="step-icon">📋</div>
             <h2>Your food list</h2>
-            <p>List foods you usually eat, your AI meal plan will be built around these</p>
+            <p>List the foods you usually eat. Your meal plan will be built around them.</p>
             <div className="field">
               <textarea
                 placeholder="e.g. eggs, chicken, rice, spinach, yogurt, almonds, lentils, oats..."
@@ -225,7 +220,7 @@ export default function Onboarding() {
                     reader.readAsText(file)
                   }}
                 />
-                <span className="file-upload-btn">📁 Choose a .txt or .csv file</span>
+                <span className="file-upload-btn">Choose a .txt or .csv file</span>
               </label>
             </div>
             <p className="hint">The more you add, the more personalised your meal plan will be</p>
@@ -245,12 +240,8 @@ export default function Onboarding() {
           ) : (
             <button className="btn-primary" onClick={submit} disabled={loading}>
               {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <span style={{
-                    width: 16, height: 16, border: '2px solid rgba(26,15,10,0.3)',
-                    borderTopColor: '#1a0f0a', borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite', display: 'inline-block'
-                  }} />
+                <span className="btn-busy">
+                  <span className="btn-spin" />
                   Setting up your profile...
                 </span>
               ) : 'Complete setup'}

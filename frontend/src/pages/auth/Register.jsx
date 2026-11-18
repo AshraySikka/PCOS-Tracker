@@ -32,9 +32,9 @@ export default function Register() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">✦</div>
+          <span className="auth-logo">PCOS Tracker</span>
           <h1>Create account</h1>
-          <p>Start your PCOS wellness journey</p>
+          <p>It takes a minute. You will set up your profile next.</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="auth-form">

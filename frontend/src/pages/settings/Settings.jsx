@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../../api/client'
 import './settings.css'
 
 export default function Settings() {
-  const navigate = useNavigate()
   const [prefs, setPrefs] = useState({
     meal_reminders: true,
     water_reminders: true,
@@ -74,12 +72,11 @@ export default function Settings() {
   return (
     <div className="settings-page">
       <div className="settings-header">
-        <button className="btn-back" onClick={() => navigate('/dashboard')}>← Back</button>
         <h1>Settings</h1>
       </div>
 
       <div className="settings-section">
-        <h2>Push Notifications</h2>
+        <h2>Push notifications</h2>
         <p>Get reminded to eat, drink water, and exercise on time.</p>
 
         {!notifSupported && (
@@ -90,12 +87,12 @@ export default function Settings() {
 
         {notifSupported && notifPermission !== 'granted' && (
           <button className="btn-enable-notif" onClick={enableNotifications}>
-            🔔 Enable notifications
+            Enable notifications
           </button>
         )}
 
         {notifSupported && notifPermission === 'granted' && (
-          <div className="notif-granted">✓ Notifications enabled</div>
+          <div className="notif-granted">Notifications are on</div>
         )}
       </div>
 
@@ -164,7 +161,7 @@ export default function Settings() {
       </div>
 
       <button className="btn-save" onClick={save} disabled={saving}>
-        {saved ? '✓ Saved' : saving ? 'Saving...' : 'Save settings'}
+        {saved ? 'Saved' : saving ? 'Saving...' : 'Save settings'}
       </button>
     </div>
   )

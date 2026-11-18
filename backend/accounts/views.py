@@ -9,6 +9,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.authtoken.models import Token
+from django.conf import settings
+from django.http import HttpResponseRedirect
+from .demo import ensure_demo_user
 
 User = get_user_model()
 
@@ -64,3 +67,25 @@ def me(request):
 def csrf_token(request):
     token = get_token(request)
     return JsonResponse({'csrfToken': token})
+
+
+@csrf_exempt
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def demo_login(request):
+    """Passwordless login for the demo user Jane.
+
+    GET  redirects to the frontend /demo page with a token (use this for the
+         portfolio "Live demo" link).
+    POST returns the same JSON shape as the normal login (used by the
+         "Try the demo" button on the login page).
+    """
+    user = ensure_demo_user()
+    token, _ = Token.objects.get_or_create(user=user)
+
+    if request.method == 'GET':
+        return HttpResponseRedirect(f'{settings.FRONTEND_URL}/demo?token={token.key}')
+
+    data = UserSerializer(user).data
+    data['token'] = token.key
+    return Response(data)

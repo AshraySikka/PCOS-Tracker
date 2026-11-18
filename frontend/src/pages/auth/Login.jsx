@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../../context/AuthContext'
-import { login } from '../../api/auth'
+import { login, demoLogin } from '../../api/auth'
 import './auth.css'
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
   const { setUser } = useAuth()
   const navigate = useNavigate()
 
@@ -26,13 +27,27 @@ export default function Login() {
     }
   }
 
+  const tryDemo = async () => {
+    setDemoLoading(true)
+    setError('')
+    try {
+      const res = await demoLogin()
+      setUser(res.data)
+      navigate('/dashboard')
+    } catch (err) {
+      setError('Could not open the demo. The server may be waking up, try again in a moment.')
+    } finally {
+      setDemoLoading(false)
+    }
+  }
+
   return (
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">✦</div>
+          <span className="auth-logo">PCOS Tracker</span>
           <h1>Welcome back</h1>
-          <p>Continue your wellness journey</p>
+          <p>Pick up where you left off.</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
@@ -63,9 +78,14 @@ export default function Login() {
           </button>
         </form>
 
+        <div className="auth-divider">or</div>
+        <button type="button" className="btn-demo" onClick={tryDemo} disabled={demoLoading}>
+          {demoLoading ? 'Opening demo...' : 'Try the demo as Jane'}
+        </button>
+
         <div className="auth-footer">
           <Link to="/forgot-password">Forgot password?</Link>
-          <span>·</span>
+          <span>|</span>
           <Link to="/register">Create account</Link>
         </div>
       </div>

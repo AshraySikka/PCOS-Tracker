@@ -61,3 +61,20 @@ cd backend
     ├── .env.example      # Environment variable template
     ├── requirements.txt
     └── README.md
+
+## Demo account
+
+A passwordless demo user (Jane) with about five months of seed data is available from the login page ("Try the demo as Jane") or through the link:
+
+```
+GET /api/auth/demo-login/
+```
+
+That endpoint redirects to the frontend `/demo` page, which signs the visitor in and opens the dashboard. Jane's data is rebuilt automatically when it goes stale, and you can rebuild it by hand:
+
+```bash
+cd backend
+python manage.py seed_demo
+```
+
+AI features (food estimates, meal and exercise plan generation) are switched off for the demo account unless `DEMO_ALLOW_AI=True`.

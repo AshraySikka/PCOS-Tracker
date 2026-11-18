@@ -7,12 +7,15 @@ from .models import MealPlan, MealDay, Meal
 from .serializers import MealPlanSerializer
 from .claude_service import generate_meal_plan
 from .unsplash_service import fetch_food_image
+from accounts.demo import demo_ai_blocked, DEMO_AI_MESSAGE
 
 DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def generate(request):
+    if demo_ai_blocked(request.user):
+        return Response({'error': DEMO_AI_MESSAGE}, status=status.HTTP_403_FORBIDDEN)
     try:
         profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:

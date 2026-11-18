@@ -1,15 +1,33 @@
 import { useState, useEffect } from 'react'
-import { getToday, addFood, deleteFood, estimateFood, addExercise, deleteExercise, addWater, deleteWater } from '../../api/logs'
+import { useSearchParams } from 'react-router-dom'
+import { getToday, getByDate, addFood, deleteFood, estimateFood, addExercise, deleteExercise, addWater, deleteWater } from '../../api/logs'
+import Icon from '../../components/Icon'
 import './log.css'
 
 const WATER_GOAL_ML = 2500
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack']
-const MEAL_ICONS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' }
+
+// "2026-11-17" -> local Date (new Date('2026-11-17') would shift by timezone)
+function parseDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+function shiftDate(iso, days) {
+  const d = parseDate(iso)
+  d.setDate(d.getDate() + days)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mm}-${dd}`
+}
 
 export default function Log() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const dateParam = searchParams.get('date')
   const [log, setLog] = useState(null)
+  const [serverToday, setServerToday] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState('food')
+  const [estimateError, setEstimateError] = useState('')
 
   const [foodForm, setFoodForm] = useState({ meal_type: 'breakfast', name: '', quantity: '', calories: '', protein_g: '' })
   const [estimating, setEstimating] = useState(false)
@@ -19,19 +37,27 @@ export default function Log() {
   const [addingExercise, setAddingExercise] = useState(false)
 
   const refresh = () => {
-    getToday().then(res => setLog(res.data)).finally(() => setLoading(false))
+    const request = dateParam ? getByDate(dateParam) : getToday()
+    request.then(res => setLog(res.data)).catch(console.error).finally(() => setLoading(false))
   }
 
-  useEffect(() => { refresh() }, [])
+  useEffect(() => { refresh() }, [dateParam])
+  useEffect(() => { getToday().then(res => setServerToday(res.data.date)).catch(console.error) }, [])
+
+  const viewDate = log?.date
+  const isToday = !!viewDate && viewDate === serverToday
+  const canGoNext = !!viewDate && !!serverToday && viewDate < serverToday
+  const goTo = iso => setSearchParams(iso === serverToday ? {} : { date: iso })
 
   const handleEstimate = async () => {
     if (!foodForm.name) return
     setEstimating(true)
+    setEstimateError('')
     try {
       const res = await estimateFood({ name: foodForm.name, quantity: foodForm.quantity })
       setFoodForm(f => ({ ...f, calories: res.data.calories, protein_g: res.data.protein_g }))
     } catch (err) {
-      console.error(err)
+      setEstimateError(err.response?.data?.error || 'Could not estimate this food. Enter the numbers by hand.')
     } finally {
       setEstimating(false)
     }
@@ -41,7 +67,7 @@ export default function Log() {
     if (!foodForm.name) return
     setAddingFood(true)
     try {
-      await addFood(foodForm)
+      await addFood({ ...foodForm, date: viewDate })
       setFoodForm({ meal_type: 'breakfast', name: '', quantity: '', calories: '', protein_g: '' })
       refresh()
     } catch (err) {
@@ -60,7 +86,7 @@ export default function Log() {
     if (!exerciseForm.name) return
     setAddingExercise(true)
     try {
-      await addExercise(exerciseForm)
+      await addExercise({ ...exerciseForm, date: viewDate })
       setExerciseForm({ name: '', duration_mins: '', calories_burned: '' })
       refresh()
     } catch (err) {
@@ -76,7 +102,7 @@ export default function Log() {
   }
 
   const handleAddWater = async (amount) => {
-    await addWater(amount)
+    await addWater(amount, viewDate)
     refresh()
   }
 
@@ -87,14 +113,27 @@ export default function Log() {
 
   const waterPercent = Math.min(100, Math.round(((log?.total_water_ml || 0) / WATER_GOAL_ML) * 100))
 
-  if (loading) return <div className="log-loading">Loading today's log...</div>
+  if (loading) return <div className="app-loading">Loading your log...</div>
 
   return (
     <div className="log-page">
       <div className="log-header">
         <div>
-          <h1>Daily Log</h1>
-          <p>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <h1>Daily log</h1>
+          <div className="date-nav">
+            <button type="button" className="date-step" aria-label="Previous day" onClick={() => viewDate && goTo(shiftDate(viewDate, -1))}>
+              <Icon name="left" size={16} />
+            </button>
+            <span className="date-label">
+              {viewDate ? parseDate(viewDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : ''}
+            </span>
+            <button type="button" className="date-step" aria-label="Next day" disabled={!canGoNext} onClick={() => goTo(shiftDate(viewDate, 1))}>
+              <Icon name="right" size={16} />
+            </button>
+            {!isToday && serverToday && (
+              <button type="button" className="date-today" onClick={() => goTo(serverToday)}>Back to today</button>
+            )}
+          </div>
         </div>
         <div className="log-stats">
           <div className="stat-pill">
@@ -105,7 +144,7 @@ export default function Log() {
             <span className="stat-value">{log?.total_protein || 0}g</span>
             <span className="stat-label">protein</span>
           </div>
-          <div className="stat-pill water">
+          <div className="stat-pill">
             <span className="stat-value">{Math.round((log?.total_water_ml || 0) / 1000 * 10) / 10}L</span>
             <span className="stat-label">water</span>
           </div>
@@ -119,7 +158,7 @@ export default function Log() {
             className={`section-tab ${activeSection === s ? 'active' : ''}`}
             onClick={() => setActiveSection(s)}
           >
-            {s === 'food' ? '🍽️' : s === 'exercise' ? '🏃' : '💧'} {s.charAt(0).toUpperCase() + s.slice(1)}
+            {s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
       </div>
@@ -159,9 +198,10 @@ export default function Log() {
                 onChange={e => setFoodForm(f => ({ ...f, protein_g: e.target.value }))}
               />
               <button className="btn-estimate" onClick={handleEstimate} disabled={estimating || !foodForm.name}>
-                {estimating ? '...' : '✨ Estimate'}
+                {estimating ? 'Estimating...' : 'AI estimate'}
               </button>
             </div>
+            {estimateError && <div className="form-error">{estimateError}</div>}
             <button className="btn-add" onClick={handleAddFood} disabled={addingFood || !foodForm.name}>
               {addingFood ? 'Adding...' : '+ Add food'}
             </button>
@@ -174,7 +214,7 @@ export default function Log() {
               return (
                 <div key={mealType} className="meal-group">
                   <div className="meal-group-header">
-                    <span>{MEAL_ICONS[mealType]} {mealType.charAt(0).toUpperCase() + mealType.slice(1)}</span>
+                    <span>{mealType.charAt(0).toUpperCase() + mealType.slice(1)}</span>
                     <span>{entries.reduce((sum, e) => sum + (e.calories || 0), 0)} kcal</span>
                   </div>
                   {entries.map(entry => (
@@ -195,7 +235,7 @@ export default function Log() {
               )
             })}
             {(!log?.food_entries || log.food_entries.length === 0) && (
-              <div className="empty-entries">No food logged yet today</div>
+              <div className="empty-entries">{isToday ? 'No food logged yet today' : 'No food logged on this day'}</div>
             )}
           </div>
         </div>
@@ -245,7 +285,7 @@ export default function Log() {
               </div>
             ))}
             {(!log?.exercise_entries || log.exercise_entries.length === 0) && (
-              <div className="empty-entries">No exercise logged yet today</div>
+              <div className="empty-entries">{isToday ? 'No exercise logged yet today' : 'No exercise logged on this day'}</div>
             )}
           </div>
         </div>
@@ -256,11 +296,11 @@ export default function Log() {
           <div className="water-tracker">
             <div className="water-circle-wrapper">
               <svg viewBox="0 0 120 120" className="water-circle">
-                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8"/>
+                <circle className="ring-track" cx="60" cy="60" r="54" fill="none" strokeWidth="8"/>
                 <circle
+                  className="ring-fill"
                   cx="60" cy="60" r="54"
                   fill="none"
-                  stroke="#a0c4e8"
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 54}`}
@@ -281,7 +321,7 @@ export default function Log() {
               <div className="water-quick">
                 {[150, 250, 350, 500].map(ml => (
                   <button key={ml} className="btn-water" onClick={() => handleAddWater(ml)}>
-                    💧 {ml}ml
+                    {ml} ml
                   </button>
                 ))}
               </div>
@@ -292,7 +332,7 @@ export default function Log() {
             {log?.water_entries?.map(entry => (
               <div key={entry.id} className="entry-row">
                 <div className="entry-info">
-                  <span className="entry-name">💧 Water</span>
+                  <span className="entry-name">Water</span>
                   <span className="entry-qty">{entry.amount_ml}ml</span>
                 </div>
                 <div className="entry-macros">
@@ -302,7 +342,7 @@ export default function Log() {
               </div>
             ))}
             {(!log?.water_entries || log.water_entries.length === 0) && (
-              <div className="empty-entries">No water logged yet today</div>
+              <div className="empty-entries">{isToday ? 'No water logged yet today' : 'No water logged on this day'}</div>
             )}
           </div>
         </div>

@@ -6,10 +6,13 @@ from profiles.models import UserProfile
 from .models import ExercisePlan, ExerciseDay, Exercise
 from .serializers import ExercisePlanSerializer
 from .claude_service import generate_exercise_plan
+from accounts.demo import demo_ai_blocked, DEMO_AI_MESSAGE
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def generate(request):
+    if demo_ai_blocked(request.user):
+        return Response({'error': DEMO_AI_MESSAGE}, status=status.HTTP_403_FORBIDDEN)
     try:
         profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:

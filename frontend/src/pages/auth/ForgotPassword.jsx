@@ -13,7 +13,7 @@ export default function ForgotPassword() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">✦</div>
+          <span className="auth-logo">PCOS Tracker</span>
           <h1>Reset password</h1>
           <p>We'll send you a code to reset your password</p>
         </div>

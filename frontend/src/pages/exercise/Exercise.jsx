@@ -2,24 +2,14 @@ import { useState, useEffect } from 'react'
 import api from '../../api/client'
 import './exercise.css'
 
-const TYPE_COLORS = {
-  strength: '#e8b4a0',
-  cardio: '#a0c4e8',
-  hiit: '#e8a0b4',
-  yoga: '#b4e8a0',
-  walk: '#c4e8a0',
-  rest: 'rgba(245,240,235,0.2)',
-  mixed: '#e8d4a0',
-}
-
-const TYPE_ICONS = {
-  strength: '🏋️',
-  cardio: '🏃',
-  hiit: '⚡',
-  yoga: '🧘',
-  walk: '🚶',
-  rest: '😴',
-  mixed: '💪',
+const TYPE_LABELS = {
+  strength: 'Strength',
+  cardio: 'Cardio',
+  hiit: 'HIIT',
+  yoga: 'Yoga',
+  walk: 'Walk',
+  rest: 'Rest',
+  mixed: 'Mixed',
 }
 
 export default function Exercise() {
@@ -59,11 +49,11 @@ export default function Exercise() {
     <div className="exercise-page">
       <div className="exercise-header">
         <div>
-          <h1>Your Exercise Plan</h1>
+          <h1>Exercise plan</h1>
           {plan && <p>{plan.weekly_summary}</p>}
         </div>
         <button className="btn-generate" onClick={generate} disabled={generating}>
-          {generating ? <><span className="spinner" />Generating...</> : <>{plan ? '✨ Regenerate' : '✨ Generate Plan'}</>}
+          {generating ? <><span className="spinner" />Generating...</> : <>{plan ? 'Regenerate' : 'Generate plan'}</>}
         </button>
       </div>
 
@@ -72,18 +62,17 @@ export default function Exercise() {
       {generating && (
         <div className="generating-state">
           <div className="generating-spinner" />
-          <p>Your AI fitness coach is building your personalised plan...</p>
+          <p>Building your exercise plan...</p>
           <span>This takes about 15-20 seconds</span>
         </div>
       )}
 
       {!generating && !plan && (
         <div className="empty-state">
-          <div className="empty-icon">🏃‍♀️</div>
           <h2>No exercise plan yet</h2>
-          <p>Generate your personalised 7-day PCOS-friendly workout plan</p>
+          <p>Generate a workout plan that suits your activity level and symptoms.</p>
           <button className="btn-generate-large" onClick={generate}>
-            ✨ Generate My Exercise Plan
+            Generate my exercise plan
           </button>
         </div>
       )}
@@ -99,8 +88,8 @@ export default function Exercise() {
                   className={`day-tab ${activeDay === day ? 'active' : ''} ${dayData?.type === 'rest' ? 'rest' : ''}`}
                   onClick={() => setActiveDay(day)}
                 >
-                  <span className="day-icon">{TYPE_ICONS[dayData?.type] || '💪'}</span>
                   <span className="day-short">{day.slice(0, 3)}</span>
+                  <span className="day-type">{TYPE_LABELS[dayData?.type] || ''}</span>
                 </button>
               )
             })}
@@ -108,9 +97,8 @@ export default function Exercise() {
 
           {activeDayData && (
             <div className="day-content">
-              <div className="day-header" style={{ borderColor: TYPE_COLORS[activeDayData.type] }}>
+              <div className="day-header">
                 <div className="day-title-group">
-                  <span className="day-type-icon">{TYPE_ICONS[activeDayData.type]}</span>
                   <div>
                     <h2>{activeDayData.title}</h2>
                     <div className="day-meta">
@@ -118,7 +106,7 @@ export default function Exercise() {
                         <span>{activeDayData.duration_mins} mins</span>
                       )}
                       {activeDayData.intensity && activeDayData.intensity !== 'none' && (
-                        <span className="intensity-badge" style={{ color: TYPE_COLORS[activeDayData.type] }}>
+                        <span className="intensity-badge">
                           {activeDayData.intensity}
                         </span>
                       )}
@@ -146,13 +134,12 @@ export default function Exercise() {
                         {ex.notes && <p className="exercise-notes">{ex.notes}</p>}
                       </div>
                       {ex.youtube_url && (
-                        
                         <a href={ex.youtube_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="youtube-btn"
                         >
-                          ▶ Watch
+                          Watch video
                         </a>
                       )}
                     </div>

@@ -127,3 +127,11 @@ SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
 VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
 VAPID_CLAIMS_EMAIL = os.getenv('VAPID_CLAIMS_EMAIL')
+
+# Demo account (Jane). FRONTEND_URL is where the demo-login link sends visitors.
+FRONTEND_URL = os.getenv(
+    'FRONTEND_URL',
+    'http://localhost:5173' if DEBUG else 'https://pcos-tracker-ten.vercel.app',
+).rstrip('/')
+# The demo account cannot use the paid AI features unless this is set to True.
+DEMO_ALLOW_AI = os.getenv('DEMO_ALLOW_AI', 'False') == 'True'
